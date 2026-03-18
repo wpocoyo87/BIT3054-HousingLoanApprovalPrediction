@@ -40,7 +40,7 @@
             <tbody>
                 {% for app in applications %}
                 <tr>
-                    <td class="px-4 fw-semibold text-secondary">#{{ app.application_id }}</td>
+                    <td class="px-4 fw-semibold text-secondary">#{{ app.id }}</td>
                     <td class="fw-semibold">${{ app.loan_amount }}</td>
                     <td class="text-muted">{{ app.created_at.strftime('%Y-%m-%d') }}</td>
                     <td>
@@ -53,7 +53,7 @@
                         {% endif %}
                     </td>
                     <td class="text-end px-4">
-                        <a href="{{ url_for('main.result', id=app.application_id) }}" class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3">View Details</a>
+                        <a href="{{ url_for('main.result', id=app.id) }}" class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3">View Details</a>
                     </td>
                 </tr>
                 {% endfor %}

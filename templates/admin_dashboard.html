@@ -13,7 +13,7 @@
             <thead class="table-dark text-white">
                 <tr>
                     <th class="py-3 px-4">Ref ID</th>
-                    <th class="py-3">Applicant Name</th>
+                    <th class="py-3">Processed By</th>
                     <th class="py-3">Income</th>
                     <th class="py-3">Loan Amt</th>
                     <th class="py-3">Credit His.</th>
@@ -28,7 +28,7 @@
                     <td class="fw-semibold">{{ app.user.name }}</td>
                     <td>${{ app.income }}</td>
                     <td>${{ app.loan_amount }}</td>
-                    <td>{{ app.credit_history }}</td>
+                    <td>{{ app.credit_score }}</td>
                     <td>
                         {% if app.prediction == 'Approved' %}
                             <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill border border-success-subtle">Approved</span>

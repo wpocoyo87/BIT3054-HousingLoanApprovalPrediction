@@ -21,19 +21,19 @@
             <div class="card-body p-5">
                 {% if application.prediction == 'Approved' %}
                     <div class="mb-4">
-                        <div class="display-1 text-success mb-3">🎉</div>
-                        <h2 class="text-success fw-bold">Congratulations!</h2>
-                        <p class="lead text-muted mt-3 px-md-4">Based on our Machine Learning intelligence, this profile meets the criteria for loan approval.</p>
+                        <div class="display-4 text-success mb-3"><i class="bi bi-shield-check"></i></div>
+                        <h3 class="text-success fw-bold">Approval Recommended</h3>
+                        <p class="text-muted mt-3 px-md-4">The machine learning model indicates a low risk profile and recommends approval based on the applicant's financial indicators.</p>
                     </div>
                 {% elif application.prediction == 'Rejected' %}
                     <div class="mb-4">
-                        <div class="display-1 text-danger mb-3">⚠️</div>
-                        <h2 class="text-danger fw-bold">Application Denied</h2>
-                        <p class="lead text-muted mt-3 px-md-4">Based on our Machine Learning intelligence, the risk factors are too high to approve this loan at this time.</p>
+                        <div class="display-4 text-danger mb-3"><i class="bi bi-shield-exclamation"></i></div>
+                        <h3 class="text-danger fw-bold">High Risk Identified</h3>
+                        <p class="text-muted mt-3 px-md-4">The machine learning model identifies high risk factors associated with this application. Further manual review or rejection is advised.</p>
                     </div>
                 {% else %}
                     <div class="mb-4">
-                        <h2 class="text-warning fw-bold">Wait...</h2>
+                        <h3 class="text-warning fw-bold">Processing</h3>
                         <p class="mt-3 text-muted">{{ application.prediction }}</p>
                     </div>
                 {% endif %}
@@ -44,13 +44,25 @@
                     <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">Application Snapshot</h5>
                     <div class="row gy-3">
                         <div class="col-sm-5 text-muted fw-semibold">Application Reference</div>
-                        <div class="col-sm-7 fw-bold text-dark">#{{ application.application_id }}</div>
+                        <div class="col-sm-7 fw-bold text-dark">#{{ application.id }}</div>
                         
+                        <div class="col-sm-5 text-muted fw-semibold">Processed By</div>
+                        <div class="col-sm-7 fw-bold text-dark">{{ application.user.name }}</div>
+
                         <div class="col-sm-5 text-muted fw-semibold">Total Loan Amount</div>
                         <div class="col-sm-7 fw-bold text-dark fs-5">${{ application.loan_amount }}</div>
                         
+                        <div class="col-sm-5 text-muted fw-semibold">Loan Term</div>
+                        <div class="col-sm-7 fw-bold text-dark">{{ application.loan_term }} Months</div>
+
                         <div class="col-sm-5 text-muted fw-semibold">Monthly Income</div>
                         <div class="col-sm-7 fw-bold text-dark">${{ application.income }}</div>
+
+                        <div class="col-sm-5 text-muted fw-semibold">Coapplicant Income</div>
+                        <div class="col-sm-7 fw-bold text-dark">${{ application.coapplicant_income }}</div>
+                        
+                        <div class="col-sm-5 text-muted fw-semibold">Credit History Score</div>
+                        <div class="col-sm-7 fw-bold text-dark">{{ application.credit_score }}</div>
                         
                         <div class="col-sm-5 text-muted fw-semibold">Application Date</div>
                         <div class="col-sm-7 fw-bold text-dark">{{ application.created_at.strftime('%B %d, %Y') }}</div>

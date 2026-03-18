@@ -9,20 +9,41 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 p-3 shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-glass mb-4 p-3 sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Housing Loan ML</a>
+            <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-house-door-fill text-primary"></i> Housing Loan ML
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navcol">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navcol">
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('main.loan_form') }}">New Application</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('auth.logout') }}">Logout ({{ current_user.name }})</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('main.admin_users') }}"><i class="bi bi-people"></i> Manage Users</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.loan_form') }}">New Application</a></li>
+                        
+                        <li class="nav-item dropdown ms-lg-3 mt-2 mt-lg-0">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 py-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="https://ui-avatars.com/api/?name={{ current_user.name | urlencode }}&background=0d47a1&color=fff&rounded=true&size=36" alt="Avatar" class="rounded-circle border border-2 border-white shadow-sm" width="36" height="36">
+                                <span class="fw-bold">{{ current_user.name }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-4 mt-2" aria-labelledby="navbarDropdown">
+                                <li><h6 class="dropdown-header text-muted fw-bold">{{ current_user.email }}</h6></li>
+                                <li>
+                                    <div class="px-3 py-1">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill w-100">{{ current_user.role | title }}</span>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider opacity-50"></li>
+                                <li><a class="dropdown-item text-danger fw-semibold" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                            </ul>
+                        </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('auth.login') }}">Login</a></li>
+                        <li class="nav-item"><a class="btn btn-primary text-white px-4 rounded-pill fw-bold shadow-sm" href="{{ url_for('auth.login') }}">Login</a></li>
                     {% endif %}
                 </ul>
             </div>

@@ -19,7 +19,7 @@ class LoanApplication(me.Document):
     coapplicant_income = me.FloatField(required=True)
     loan_amount = me.FloatField(required=True)
     loan_term = me.FloatField(required=True)
-    credit_history = me.FloatField(required=True)
+    credit_score = me.FloatField(required=True)
     education = me.StringField(required=True, max_length=50)
     married = me.StringField(required=True, max_length=10)
     dependents = me.StringField(required=True, max_length=10)
