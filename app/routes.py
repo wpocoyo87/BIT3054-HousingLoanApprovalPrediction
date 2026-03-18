@@ -35,7 +35,7 @@ def loan_form():
         coapplicant_income = float(request.form.get('coapplicant_income'))
         loan_amount = float(request.form.get('loan_amount'))
         loan_term = float(request.form.get('loan_term'))
-        credit_history = float(request.form.get('credit_history'))
+        credit_score = float(request.form.get('credit_history')) # We kept the HTML input name 'credit_history' previously, let's just parse it as credit_score
         education = request.form.get('education')
         married = request.form.get('married')
         dependents = request.form.get('dependents')
@@ -48,7 +48,7 @@ def loan_form():
             coapplicant_income=coapplicant_income,
             loan_amount=loan_amount,
             loan_term=loan_term,
-            credit_history=credit_history,
+            credit_score=credit_score,
             education=education,
             married=married,
             dependents=dependents,
@@ -63,9 +63,9 @@ def loan_form():
             input_data = pd.DataFrame([{
                 'ApplicantIncome': income,
                 'CoapplicantIncome': coapplicant_income,
-                'LoanAmount': loan_amount,
+                'LoanAmount': loan_amount / 1000.0, # The model was trained on loan amounts in thousands (e.g. 185 = 185k)
                 'Loan_Amount_Term': loan_term,
-                'Credit_History': credit_history,
+                'Credit_Score': credit_score,
                 'Education': education,
                 'Married': married,
                 'Dependents': dependents,
@@ -73,7 +73,12 @@ def loan_form():
             }])
             
             processed_data = preprocess_input(input_data)
+            print("--- DEBUG: PROCESSED DATA ---")
+            print(processed_data)
+            print("--- DEBUG: PROCESSED DATA TYPES ---")
+            print(processed_data.dtypes)
             pred = model.predict(processed_data)[0]
+            print(f"--- DEBUG: PREDICTION RESULT: {pred} ---")
             
             result = 'Approved' if pred == 1 else 'Rejected'
             

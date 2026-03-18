@@ -23,7 +23,7 @@ def preprocess_input(df):
         df = df.drop(columns=['Property_Area'])
     
     cols = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 
-            'Credit_History', 'Education', 'Married', 'Dependents', 
+            'Credit_Score', 'Education', 'Married', 'Dependents', 
             'Property_Area_Rural', 'Property_Area_Semiurban', 'Property_Area_Urban']
             
     for col in cols:
@@ -45,7 +45,9 @@ def preprocess_training_data(df):
     df['Self_Employed'] = df.get('Self_Employed', pd.Series(['No']*len(df))).fillna('No')
     df['LoanAmount'] = df['LoanAmount'].fillna(df['LoanAmount'].median())
     df['Loan_Amount_Term'] = df['Loan_Amount_Term'].fillna(df['Loan_Amount_Term'].mode()[0])
-    df['Credit_History'] = df['Credit_History'].fillna(df['Credit_History'].mode()[0])
+    
+    if 'Credit_Score' in df.columns:
+        df['Credit_Score'] = df['Credit_Score'].fillna(df['Credit_Score'].median())
     
     # Map target
     if 'Loan_Status' in df.columns:
@@ -57,7 +59,7 @@ def preprocess_training_data(df):
     
     df = pd.get_dummies(df, columns=['Property_Area'])
     
-    cols_to_drop = ['Loan_ID', 'Gender', 'Self_Employed']
+    cols_to_drop = ['Loan_ID', 'Gender', 'Self_Employed', 'Credit_History']
     for col in cols_to_drop:
         if col in df.columns:
             df = df.drop(columns=[col])
@@ -70,7 +72,7 @@ def preprocess_training_data(df):
         y = None
         
     cols = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 
-            'Credit_History', 'Education', 'Married', 'Dependents', 
+            'Credit_Score', 'Education', 'Married', 'Dependents', 
             'Property_Area_Rural', 'Property_Area_Semiurban', 'Property_Area_Urban']
             
     for col in cols:

@@ -2,6 +2,7 @@ from flask import Flask
 from config import Config
 from flask_login import LoginManager
 from mongoengine import connect
+import mongomock
 import os
 
 login_manager = LoginManager()
@@ -12,8 +13,8 @@ def create_app(config_class=Config):
     app = Flask(__name__, template_folder='../templates', static_folder='../static')
     app.config.from_object(config_class)
     
-    # Initialize MongoEngine
-    connect(host=app.config['MONGODB_SETTINGS']['host'])
+    # Initialize MongoEngine using mongomock for testing without a real DB
+    connect('housing_loan_db', host='mongodb://localhost', mongo_client_class=mongomock.MongoClient)
     
     login_manager.init_app(app)
 
