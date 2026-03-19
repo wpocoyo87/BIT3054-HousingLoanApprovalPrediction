@@ -5,19 +5,19 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install system dependecies
-RUN app-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependecies first (layer caching)
-COPY requirement.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application
 COPY . .
 
 # Train the ML model during build
-RUN python ml_model/train_model.python
+RUN python ml_model/train_model.py
 
 # Expose port
 EXPOSE 8000
