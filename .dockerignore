@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc 
+*.pyo 
+venv/
+.venv/
+.env
+.git/
+.gitignore
+test_client.py
+generate_realistic_data.py
+README.md
+.DS_store
