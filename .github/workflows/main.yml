@@ -1,0 +1,47 @@
+# The name displayed in your Github Actions dashboard
+name: Build and Push to Docker Hub
+
+# TRIGGER: When should this "robot" start working?
+on:
+    push:
+        # Only run when code is pushed to these specific branches
+        branches:
+            - main
+            - develop
+
+# JOBS: What tasks should the "robot" perform?
+jobs:
+    build-and-push:
+        # Use a clean, fast Ubuntu computer provided by GitHub (Free!)
+        runs-on: ubuntu-latest
+
+        # STEPS: the step-by-step instruction for the "robot"
+        steps:
+            # step 1: Download/copy your latest code from GitHub into the robot's memory
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            # step 2: Login to your Docker Hub account using the SECRETS you added
+            # ${{ secret.XYZ }} tells GitHub to safely use the hidden password/token
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                username: ${{ secrets.DOCKERHUB_USERNAME }}
+                password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            # step 3: BUILD the docker image from your Dockerfile and PUSH it to Docker Hub
+            - name: Build and push Docker image
+              id: docker_build
+              uses: docker/build-push-action@v5
+              with:
+                # context: . mean "look for the Dockerfile in the current project folder"
+                context: .
+                # push: tru means "upload it to DOcker Hub after building"
+                push: true
+                # Tagging the image so it has a name on Docker Hub
+                tags: ${{ secrets.DOCKERHUB_USERNAME }}/housing-loan-app:latest
+
+            # step 4: Show a success message/ID (Digest) to confirm it is finished
+            - name: Image digest
+              run: echo ${{ steps.docker_build.outputs.digest }}
