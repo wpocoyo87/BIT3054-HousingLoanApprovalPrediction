@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings{% endblock %}
+{% block page_title %}Account & System Settings{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <!-- Profile Overview Card -->
+        <div class="card border-0 shadow-sm text-center p-5 mb-4">
+            <div class="position-relative d-inline-block mx-auto mb-4">
+                <img src="https://ui-avatars.com/api/?name={{ current_user.name | urlencode }}&background=0a192f&color=fff&rounded=true&size=120" 
+                     alt="Avatar" class="rounded-circle shadow">
+                <button class="btn btn-emerald-green btn-sm rounded-circle position-absolute bottom-0 end-0 p-2 text-white border-4 border-white">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+            </div>
+            <h4 class="fw-800 text-navy mb-1">{{ current_user.name }}</h4>
+            <p class="text-muted small mb-4">{{ current_user.role | upper }} • Security ID: {{ (current_user.id | string)[-8:] | upper }}</p>
+            
+            <div class="d-grid">
+                <button class="btn btn-navy rounded-pill fw-bold">View Public Profile</button>
+            </div>
+        </div>
+
+        <!-- Session Info Card -->
+        <div class="card border-0 shadow-sm p-4">
+            <h6 class="fw-bold text-navy mb-3">Security Status</h6>
+            <div class="vstack gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-emerald-light text-emerald-green p-2 rounded-3 small">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 small fw-bold">Two-Factor Auth</p>
+                        <p class="mb-0 x-small text-muted">Enabled via Corporate Email</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-light text-muted p-2 rounded-3 small">
+                        <i class="bi bi-laptop"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 small fw-bold">Current Session</p>
+                        <p class="mb-0 x-small text-muted">Kuala Lumpur, Malaysia (IP: 121.X.X.X)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header bg-white border-0 p-0">
+                <ul class="nav nav-tabs nav-fill border-0 bg-light" id="settingsTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active py-3 fw-bold border-0 rounded-0" id="profile-tab" data-bs-toggle="tab" href="#profile" role="tab">
+                            <i class="bi bi-person-fill me-2"></i> Profile Info
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-3 fw-bold border-0 rounded-0" id="security-tab" data-bs-toggle="tab" href="#security" role="tab">
+                            <i class="bi bi-shield-lock-fill me-2"></i> Security
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-3 fw-bold border-0 rounded-0" id="prefs-tab" data-bs-toggle="tab" href="#prefs" role="tab">
+                            <i class="bi bi-sliders me-2"></i> Preferences
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body p-4 p-md-5">
+                <div class="tab-content" id="settingsTabsContent">
+                    <!-- Profile Tab -->
+                    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                        <h5 class="fw-800 text-navy mb-4">Personal Information</h5>
+                        <form method="POST">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" value="{{ current_user.name }}" placeholder="En. Safwan">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Work Email</label>
+                                    <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Department</label>
+                                    <input type="text" class="form-control" value="Home Financing (HF)" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contact Number</label>
+                                    <input type="text" class="form-control" placeholder="+60 1X-XXXXXXX">
+                                </div>
+                                <div class="col-12 text-end mt-4">
+                                    <button type="submit" class="btn btn-navy px-5 py-2 fw-bold shadow-sm">Save Profile Changes</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Tab -->
+                    <div class="tab-pane fade" id="security" role="tabpanel">
+                        <h5 class="fw-800 text-navy mb-4">Update Password</h5>
+                        <form method="POST">
+                            <div class="mb-4">
+                                <label class="form-label">Current Password</label>
+                                <input type="password" class="form-control border-2 shadow-none" required>
+                                <small class="text-muted">You must verify current password to update security settings.</small>
+                            </div>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label">New Password</label>
+                                    <input type="password" class="form-control border-2 shadow-none" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Confirm New Password</label>
+                                    <input type="password" class="form-control border-2 shadow-none" required>
+                                </div>
+                                <div class="col-12 text-end mt-4">
+                                    <button type="submit" class="btn btn-navy px-5 py-2 fw-bold shadow-sm">Change Password</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Preferences Tab -->
+                    <div class="tab-pane fade" id="prefs" role="tabpanel">
+                        <h5 class="fw-800 text-navy mb-4">System Customization</h5>
+                        <div class="vstack gap-4">
+                            <div class="d-flex justify-content-between align-items-center p-3 rounded-4 bg-light">
+                                <div>
+                                    <p class="mb-0 fw-bold">Enable Desktop Notifications</p>
+                                    <p class="mb-0 small text-muted">Receive alerts for new financing applications</p>
+                                </div>
+                                <div class="form-check form-switch fs-4">
+                                    <input class="form-check-input" type="checkbox" checked>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center p-3 rounded-4 bg-light">
+                                <div>
+                                    <p class="mb-0 fw-bold">Automatic Decision Alerts</p>
+                                    <p class="mb-0 small text-muted">Notify if AI confidence is below 60%</p>
+                                </div>
+                                <div class="form-check form-switch fs-4">
+                                    <input class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center p-3 rounded-4 bg-light">
+                                <div>
+                                    <p class="mb-0 fw-bold">Legacy UI Support</p>
+                                    <p class="mb-0 small text-muted">Use old table layouts for better compatibility</p>
+                                </div>
+                                <div class="form-check form-switch fs-4">
+                                    <input class="form-check-input" type="checkbox">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

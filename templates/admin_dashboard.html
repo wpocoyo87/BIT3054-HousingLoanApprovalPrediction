@@ -1,46 +1,143 @@
 {% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Executive Admin Console{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark">Admin Console</h2>
+<!-- Executive Summary Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-primary-navy bg-opacity-10 text-navy">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-emerald-light text-emerald-green">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div class="stat-value">{{ total_staff }}</div>
+            <div class="stat-label">Active Staff</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-navy bg-opacity-10 text-navy" style="background: rgba(10, 25, 47, 0.1);">
+                <i class="bi bi-files"></i>
+            </div>
+            <div class="stat-value">{{ applications|length }}</div>
+            <div class="stat-label">Total Applications</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-emerald-light text-emerald-green">
+                <i class="bi bi-percent"></i>
+            </div>
+            <div class="stat-value">{{ approval_rate }}%</div>
+            <div class="stat-label">Approval Rate</div>
+        </div>
+    </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-3">
-    <div class="card-header bg-white border-0 py-3">
-        <h5 class="mb-0 fw-bold text-primary">All Network Loan Applications</h5>
+
+<!-- Model Performance Overview -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header bg-navy text-white p-4 d-flex justify-content-between align-items-center" style="background: var(--primary-navy)">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-cpu-fill me-2"></i> Current Model Status</h5>
+                <span class="badge bg-emerald-green text-white px-3 py-2 rounded-pill">Model v2.4 Active</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-3 border-end p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Algorithm</p>
+                        <h6 class="fw-800 text-navy mb-0">Random Forest</h6>
+                    </div>
+                    <div class="col-md-3 border-end p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Accuracy</p>
+                        <h6 class="fw-800 text-emerald-green mb-0">94.6%</h6>
+                    </div>
+                    <div class="col-md-3 border-end p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">F1 Score</p>
+                        <h6 class="fw-800 text-emerald-green mb-0">0.93</h6>
+                    </div>
+                    <div class="col-md-3 p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Last Retrained</p>
+                        <h6 class="fw-800 text-navy mb-0">21 Mar 2026</h6>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Global Application Logs -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">System-wide Prediction Logs</h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-light btn-sm px-3 rounded-pill"><i class="bi bi-filter me-1"></i> Filter</button>
+            <button class="btn btn-emerald-green btn-sm px-3 text-white rounded-pill"><i class="bi bi-download me-1"></i> Export CSV</button>
+        </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-dark text-white">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
                 <tr>
-                    <th class="py-3 px-4">Ref ID</th>
-                    <th class="py-3">Processed By</th>
-                    <th class="py-3">Income</th>
-                    <th class="py-3">Loan Amt</th>
-                    <th class="py-3">Credit His.</th>
-                    <th class="py-3">Prediction</th>
-                    <th class="py-3 px-4">Timestamp</th>
+                    <th class="ps-4 py-3 small text-uppercase text-muted fw-800">Ref ID</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">Staff User</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">Income (RM)</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">Prediction</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">Confidence</th>
+                    <th class="pe-4 py-3 small text-uppercase text-muted fw-800 text-end">Timestamp</th>
                 </tr>
             </thead>
             <tbody>
                 {% for app in applications %}
                 <tr>
-                    <td class="px-4 fw-bold text-secondary">#{{ app.id }}</td>
-                    <td class="fw-semibold">{{ app.user.name }}</td>
-                    <td>${{ app.income }}</td>
-                    <td>${{ app.loan_amount }}</td>
-                    <td>{{ app.credit_score }}</td>
+                    <td class="ps-4">
+                        <div class="fw-bold text-navy">#{{ (app.id | string)[-6:] | upper }}</div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="https://ui-avatars.com/api/?name={{ app.user.name | urlencode }}&background=0a192f&color=fff&rounded=true&size=24" alt="Avatar" class="rounded-circle shadow-sm">
+                            <span class="fw-semibold text-secondary small">{{ app.user.name }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fw-bold small">RM {{ "{:,.2f}".format(app.income) }}</div>
+                    </td>
                     <td>
                         {% if app.prediction == 'Approved' %}
-                            <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill border border-success-subtle">Approved</span>
+                        <span class="badge-approved x-small"><i class="bi bi-check2-circle me-1"></i> Approved</span>
                         {% else %}
-                            <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill border border-danger-subtle">Rejected</span>
+                        <span class="badge-rejected x-small"><i class="bi bi-x-circle me-1"></i> Rejected</span>
                         {% endif %}
                     </td>
-                    <td class="px-4 text-muted small">{{ app.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <div class="progress" style="height: 6px; width: 80px;">
+                            <div class="progress-bar bg-emerald-green" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="x-small fw-bold text-muted">85%</span>
+                    </td>
+                    <td class="pe-4 text-end text-muted x-small">
+                        {{ app.created_at.strftime('%d %b %Y, %H:%M') }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <div class="card-footer bg-white border-0 py-3 text-center">
+        <a href="#" class="small fw-bold text-emerald-green text-decoration-none">View All Network Records <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
 </div>
 {% endblock %}
+

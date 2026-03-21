@@ -18,97 +18,108 @@ def generate_data():
         married = random.choice(["Yes", "No"])
         dependents = random.choices(["0", "1", "2", "3+"], weights=[0.5, 0.2, 0.2, 0.1])[0]
         education = random.choices(["Graduate", "Not Graduate"], weights=[0.8, 0.2])[0]
-        self_employed = random.choices(["No", "Yes"], weights=[0.85, 0.15])[0]
+
+        # 2. Malaysian Geographical Data
+
+        state = random.choice([
+            "Selangor", "WP Kuala Lumpur", "Johor", "Penang", "Perak", 
+            "Kedah", "Melaka", "Negeri Sembilan", "Pahang", "Perlis", 
+            "Kelantan", "Terengganu", "Sabah", "Sarawak", "WP Putrajaya"
+        ])
+        bumi_status = random.choices(["Yes", "No"], weights=[0.65, 0.35])[0]
         
-        # 2. Income (in MYR) - realistic for Malaysia
-        # Base income between rm 2000 to rm 25000
+        # 3. Employment & Income (in MYR)
+        employment_sector = random.choice(["Private", "Government", "Statutory", "Professional", "Self-Employed"])
+        lppsa_eligible = "Yes" if employment_sector in ["Government", "Statutory"] and random.random() > 0.1 else "No"
+        
         applicant_income = int(np.random.lognormal(mean=8.5, sigma=0.6))
-        applicant_income = max(1500, min(applicant_income, 50000)) # clamp between 1.5k and 50k
+        applicant_income = max(1800, min(applicant_income, 60000)) # MYR
         
-        # Coapplicant Income (often 0 if single, otherwise some value)
         if married == "Yes" and random.random() > 0.4:
             coapplicant_income = int(np.random.lognormal(mean=8.2, sigma=0.6))
-            coapplicant_income = max(1500, min(coapplicant_income, 40000))
+            coapplicant_income = max(1500, min(coapplicant_income, 45000))
         else:
             coapplicant_income = 0
             
         total_income_monthly = applicant_income + coapplicant_income
         
-        # 3. Property & Loan Amount
+        # 4. Property & Loan Amount
         property_area = random.choice(["Urban", "Semiurban", "Rural"])
+        property_type = random.choice(["Terrace", "Condominium", "Bungalow", "Apartment", "Townhouse"])
+        financing_type = random.choice(["Islamic", "Conventional"])
         
-        # Realistic Malaysian Property Prices (in thousands, e.g., 300 = RM 300,000)
+        # Realistic Malaysian Property Prices
         if property_area == "Urban":
-            loan_amount = random.randint(350, 1500) # 350k to 1.5m
+            property_value = random.randint(400, 2000) # 400k to 2m
         elif property_area == "Semiurban":
-            loan_amount = random.randint(250, 800)  # 250k to 800k
+            property_value = random.randint(300, 900)  # 300k to 900k
         else:
-            loan_amount = random.randint(100, 400)  # 100k to 400k
+            property_value = random.randint(150, 500)  # 150k to 500k
             
-        # 4. Loan Term (Months)
-        loan_term = random.choices([120, 180, 240, 300, 360, 420], weights=[0.05, 0.05, 0.1, 0.2, 0.5, 0.1])[0]
+        margin = random.choices([70, 80, 90, 100], weights=[0.1, 0.2, 0.6, 0.1])[0]
+        loan_amount = (property_value * margin) / 100.0
         
-        # 5. Credit Score (300 to 850)
-        # Higher income tends to have slightly better credit scores, but still random
-        base_score = np.random.normal(loc=650, scale=80)
-        if applicant_income > 8000:
-            base_score += 30
+        # 5. Loan Term (Months)
+        loan_term = random.choices([180, 240, 300, 360, 420], weights=[0.05, 0.1, 0.2, 0.6, 0.05])[0]
+        
+        # 6. Credit Score (300 to 850)
+        base_score = np.random.normal(loc=660, scale=90)
+        if applicant_income > 7000: base_score += 25
+        if education == "Graduate": base_score += 15
         credit_score = int(max(300, min(base_score, 850)))
+        credit_history = 1.0 if credit_score >= 640 else 0.0
         
-        # For backwards compatibility with existing model/form (0.0 or 1.0)
-        # In reality CTOS Good is > 650 usually.
-        credit_history = 1.0 if credit_score >= 650 else 0.0
-        
-        # 6. Loan Approval Logic (DSR - Debt Service Ratio)
-        # Approximate monthly installment (assume ~4.5% interest rate p.a.)
-        # Formula: M = P [ i(1 + i)^n ] / [ (1 + i)^n - 1 ]
-        P = loan_amount * 1000 # convert to actual RM
-        r = 0.045 / 12 # monthly rate
+        # 7. DSR & NDI Logic
+        P = loan_amount * 1000
+        r = 0.043 / 12 # 4.3% p.a. approx
         n = loan_term
         monthly_installment = P * (r * (1 + r)**n) / ((1 + r)**n - 1)
         
-        # DSR = (Total Commitments / Net Income) * 100
-        # Let's assume other commitments take up 15-30% of income already
-        other_commitments_ratio = random.uniform(0.15, 0.35)
-        dsr = ((monthly_installment + (total_income_monthly * other_commitments_ratio)) / total_income_monthly) * 100
+        # Estimate other commitments
+        other_commitments = total_income_monthly * random.uniform(0.1, 0.4)
+        dsr = ((monthly_installment + other_commitments) / total_income_monthly) * 100
         
-        # Approval Rules:
-        # 1. CTOS Score must be >= 650 (Good) to easily pass, <600 usually rejected immediately for big loans
-        # 2. DSR must be <= 70% (Standard bank threshold)
-        # 3. Minimum income requirement (e.g. RM 2000)
+        # NDI = Total Income - Monthly Installment - Other Commitments
+        ndi = total_income_monthly - monthly_installment - other_commitments
         
+        # 8. Approval Logic (Enhanced with NDI)
         loan_status = 'N'
-        if total_income_monthly >= 2000:
-            if credit_score >= 650 and dsr <= 70:
-                loan_status = 'Y'
-            elif credit_score >= 600 and dsr <= 50: # Marginal credit score but very strong DSR
-                loan_status = 'Y'
-            elif credit_score >= 750 and dsr <= 85: # Excellent credit, bank might allow higher DSR
-                loan_status = 'Y'
-                
-        # Inject some random noise (banks have exceptions, 5% of the time override rules)
-        if random.random() < 0.05:
+        # Rule-based foundation for simulation
+        # Minimum NDI threshold for Malaysia (usually RM 1500 to RM 3000 depending on location)
+        min_ndi = 2500 if property_area == "Urban" else 1800
+        
+        if lppsa_eligible == "Yes":
+            if credit_score >= 580 and dsr <= 85 and ndi >= (min_ndi * 0.8): loan_status = 'Y'
+        else:
+            if credit_score >= 660 and dsr <= 70 and ndi >= min_ndi: loan_status = 'Y'
+            elif credit_score >= 620 and dsr <= 55 and ndi >= (min_ndi + 500): loan_status = 'Y'
+            elif credit_score >= 750 and dsr <= 80 and ndi >= (min_ndi * 0.9): loan_status = 'Y'
+        
+        # Min income check
+        if total_income_monthly < 2500 and loan_status == 'Y':
+            loan_status = 'N'
+
+        # Random exceptions
+        if random.random() < 0.04:
             loan_status = 'Y' if loan_status == 'N' else 'N'
 
         data.append([
-            loan_id, gender, married, dependents, education, self_employed,
+            loan_id, gender, married, dependents, education, employment_sector,
             applicant_income, coapplicant_income, loan_amount, loan_term,
-            credit_history, property_area, credit_score, loan_status
+            credit_history, property_area, credit_score, state, bumi_status,
+            lppsa_eligible, property_type, margin, financing_type, dsr, ndi, loan_status
         ])
         
     return pd.DataFrame(data, columns=[
-        'Loan_ID', 'Gender', 'Married', 'Dependents', 'Education', 'Self_Employed',
+        'Loan_ID', 'Gender', 'Married', 'Dependents', 'Education', 'Employment_Sector',
         'ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term',
-        'Credit_History', 'Property_Area', 'Credit_Score', 'Loan_Status'
+        'Credit_History', 'Property_Area', 'Credit_Score', 'State', 'Bumi_Status',
+        'LPPSA_Eligible', 'Property_Type', 'Margin', 'Financing_Type', 'DSR', 'NDI', 'Loan_Status'
     ])
 
-df = generate_data()
 
-# Check what the original columns look like (e.g., if there's no Credit_Score, we append it)
-# We overwrite it directly here
-df.to_csv("c:/Users/Safwan Rahimi/Desktop/BIT3054-HousingLoanApprovalPrediction-main/ml_model/loan_data.csv", index=False)
-print("Successfully generated 5000 rows of realistic Malaysian Housing Loan Data with Credit Score!")
-print("Here's a sample:")
-print(df.head())
-print("\nApproval Rate:")
-print(df['Loan_Status'].value_counts(normalize=True))
+df = generate_data()
+df.to_csv("ml_model/loan_data.csv", index=False)
+print("Successfully generated 5000 rows of enhanced Malaysian Financing Data!")
+print(f"Approval Rate: {df['Loan_Status'].value_counts(normalize=True)['Y']:.1%}")
+

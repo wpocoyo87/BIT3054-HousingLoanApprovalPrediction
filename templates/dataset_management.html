@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Dataset Management{% endblock %}
+{% block page_title %}Dataset & Training Management{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-emerald-light text-emerald-green">
+                <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+            </div>
+            <div class="stat-value">614</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Missing Values</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-primary-navy bg-opacity-10 text-navy">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+            <div class="stat-value">13</div>
+            <div class="stat-label">ML Features</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-emerald-light text-emerald-green">
+                <i class="bi bi-calendar-check-fill"></i>
+            </div>
+            <div class="stat-value">v2.4</div>
+            <div class="stat-label">Dataset Version</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Upload Section -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 p-4">
+                <h5 class="card-title mb-0">Upload New Dataset</h5>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <div class="p-5 border-2 border-dashed rounded-4 text-center bg-light mb-4">
+                    <i class="bi bi-cloud-arrow-up-fill text-emerald-green display-4 mb-3 d-block"></i>
+                    <h6 class="fw-bold">Drag and drop CSV here</h6>
+                    <p class="small text-muted mb-4">Max file size: 10MB (CSV only)</p>
+                    <input type="file" id="datasetUpload" class="d-none">
+                    <button class="btn btn-navy px-4 rounded-pill" onclick="document.getElementById('datasetUpload').click()">Browse Files</button>
+                </div>
+                
+                <h6 class="fw-800 text-uppercase small text-muted tracking-widest mb-3">Model Configuration</h6>
+                <div class="vstack gap-3 mb-4">
+                    <div>
+                        <label class="form-label small fw-bold">Select Algorithm</label>
+                        <select class="form-select">
+                            <option value="Random Forest">Random Forest Classifier</option>
+                            <option value="Logistic Regression">Logistic Regression (Baseline)</option>
+                            <option value="XGBoost">XGBoost (Experimental)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label small fw-bold">Approval Threshold: <span class="text-emerald-green" id="thresholdValue">0.5</span></label>
+                        <input type="range" class="form-range" min="0" max="1" step="0.05" value="0.5" id="thresholdSlider" oninput="document.getElementById('thresholdValue').innerText = this.value">
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow-lg"><i class="bi bi-cpu me-2"></i> Retrain Model System</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Table -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Dataset Preview (Top 100)</h5>
+                <a href="#" class="small text-emerald-green fw-bold text-decoration-none">Full Data Explorer <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 x-small fw-semibold">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-2">Gender</th>
+                            <th class="py-2">Income</th>
+                            <th class="py-2">LoanAmt</th>
+                            <th class="py-2">Credit_History</th>
+                            <th class="py-2">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-muted">
+                        <tr>
+                            <td class="ps-4">Male</td>
+                            <td>RM 5,849</td>
+                            <td>RM 128</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">Y</span></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Male</td>
+                            <td>RM 4,583</td>
+                            <td>RM 128</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">N</span></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Female</td>
+                            <td>RM 3,000</td>
+                            <td>RM 66</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">Y</span></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Male</td>
+                            <td>RM 2,583</td>
+                            <td>RM 120</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">Y</span></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Male</td>
+                            <td>RM 6,000</td>
+                            <td>RM 141</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">Y</span></td>
+                        </tr>
+                        <tr>
+                            <td class="ps-4">Male</td>
+                            <td>RM 2,333</td>
+                            <td>RM 95</td>
+                            <td>1.0</td>
+                            <td><span class="text-emerald-green">N</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer bg-white border-0 p-4 text-center">
+                <p class="small text-muted mb-0">Last uploaded: 15/03/2026 by Admin</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

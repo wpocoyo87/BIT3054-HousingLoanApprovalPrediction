@@ -1,73 +1,139 @@
 {% extends "base.html" %}
+
+{% block title %}Staff Dashboard{% endblock %}
+{% block page_title %}Loan Officer Dashboard{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark">My Dashboard</h2>
-    <a href="{{ url_for('main.loan_form') }}" class="btn btn-primary fw-bold shadow-sm">Apply for a New Loan</a>
-</div>
-
-<div class="row mb-5">
-    <div class="col-md-6">
-        <div class="card text-white bg-success border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <h5 class="card-title text-white-50 fw-semibold mb-1">Approved Loans</h5>
-                <h2 class="display-4 fw-bold mb-0">{{ approved }}</h2>
+<!-- Quick Stats -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card stat-card border-0 text-white" style="background: linear-gradient(135deg, #0a192f 0%, #112240 100%);">
+            <div class="stat-icon bg-white bg-opacity-20">
+                <i class="bi bi-file-earmark-text"></i>
             </div>
+            <div class="stat-value text-white">{{ applications|length }}</div>
+            <div class="stat-label text-white-50">Total Applications</div>
         </div>
     </div>
-    <div class="col-md-6 mt-3 mt-md-0">
-        <div class="card text-white bg-danger border-0 shadow-sm rounded-3">
-            <div class="card-body p-4">
-                <h5 class="card-title text-white-50 fw-semibold mb-1">Rejected Loans</h5>
-                <h2 class="display-4 fw-bold mb-0">{{ rejected }}</h2>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-emerald-light text-emerald-green">
+                <i class="bi bi-check-circle-fill"></i>
             </div>
+            <div class="stat-value">{{ approved }}</div>
+            <div class="stat-label">Approved Predictions</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div class="stat-value">{{ rejected }}</div>
+            <div class="stat-label">Rejected Predictions</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0">
+            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="stat-value">0</div>
+            <div class="stat-label">Pending Reviews</div>
         </div>
     </div>
 </div>
 
-<h4 class="fw-bold mb-3">Previous Applications</h4>
-<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light text-muted">
-                <tr>
-                    <th class="py-3 px-4">Application ID</th>
-                    <th class="py-3">Loan Amount</th>
-                    <th class="py-3">Date</th>
-                    <th class="py-3">Status</th>
-                    <th class="py-3 text-end px-4">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in applications %}
-                <tr>
-                    <td class="px-4 fw-semibold text-secondary">#{{ app.id }}</td>
-                    <td class="fw-semibold">${{ app.loan_amount }}</td>
-                    <td class="text-muted">{{ app.created_at.strftime('%Y-%m-%d') }}</td>
-                    <td>
-                        {% if app.prediction == 'Approved' %}
-                            <span class="badge bg-success-subtle text-success px-3 py-2 rounded-pill border border-success-subtle">Approved</span>
-                        {% elif app.prediction == 'Rejected' %}
-                            <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill border border-danger-subtle">Rejected</span>
-                        {% else %}
-                            <span class="badge bg-secondary px-3 py-2 rounded-pill">Pending/Error</span>
+<div class="row g-4 mb-5">
+    <!-- Recent Applications Table -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Recent Financing Assessments</h5>
+                <a href="{{ url_for('main.loan_form') }}" class="btn btn-navy btn-sm px-3 rounded-pill">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3 small text-uppercase text-muted fw-800">Application ID</th>
+                            <th class="py-3 small text-uppercase text-muted fw-800">Amount (RM)</th>
+                            <th class="py-3 small text-uppercase text-muted fw-800">Date</th>
+                            <th class="py-3 small text-uppercase text-muted fw-800">Status</th>
+                            <th class="pe-4 py-3 small text-uppercase text-muted fw-800 text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications[:10] %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-navy">#{{ (app.id | string)[-6:] | upper }}</div>
+                                <div class="x-small text-muted">{{ app.state or 'Selangor' }}</div>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-navy">RM {{ "{:,.2f}".format(app.loan_amount) }}</div>
+                                <div class="x-small text-emerald-green fw-bold">{{ app.financing_type or 'Islamic' }}</div>
+                            </td>
+
+                            <td class="text-muted small">
+                                {{ app.created_at.strftime('%d %b %Y') }}
+                            </td>
+                            <td>
+                                {% if app.prediction == 'Approved' %}
+                                <span class="badge-approved small"><i class="bi bi-check2-circle me-1"></i> Approved</span>
+                                {% elif app.prediction == 'Rejected' %}
+                                <span class="badge-rejected small"><i class="bi bi-x-circle me-1"></i> Rejected</span>
+                                {% else %}
+                                <span class="badge bg-light text-muted small border">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end">
+                                <a href="{{ url_for('main.result', id=app.id) }}" class="btn btn-light btn-sm rounded-3">Details</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% if not applications %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5">
+                                <i class="bi bi-inbox text-muted display-4 mb-3 d-block"></i>
+                                <p class="text-muted fw-bold">No assessments found yet.</p>
+                                <a href="{{ url_for('main.loan_form') }}" class="btn btn-emerald-green btn-sm text-white">Start New Assessment</a>
+                            </td>
+                        </tr>
                         {% endif %}
-                    </td>
-                    <td class="text-end px-4">
-                        <a href="{{ url_for('main.result', id=app.id) }}" class="btn btn-sm btn-outline-info rounded-pill fw-bold px-3">View Details</a>
-                    </td>
-                </tr>
-                {% endfor %}
-                {% if not applications %}
-                <tr>
-                    <td colspan="5" class="text-center py-5 text-muted">
-                        <div class="mb-3 fs-1 opacity-25">📂</div>
-                        <h5 class="fw-normal">No applications found.</h5>
-                        <p class="mb-0">You haven't applied for a loan yet.</p>
-                    </td>
-                </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Quick Actions</h5>
+                <div class="vstack gap-3">
+                    <a href="{{ url_for('main.loan_form') }}" class="btn btn-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                        <i class="bi bi-plus-circle"></i> New Assessment
+                    </a>
+                    <a href="#" class="btn btn-light w-100 py-3 d-flex align-items-center justify-content-center gap-2 text-navy fw-bold">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Export Monthly Report
+                    </a>
+                    <a href="#" class="btn btn-light w-100 py-3 d-flex align-items-center justify-content-center gap-2 text-navy fw-bold">
+                        <i class="bi bi-question-circle"></i> System Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm bg-primary-navy text-white overflow-hidden" style="background: var(--primary-navy)">
+            <div class="card-body p-4 position-relative" style="z-index: 1;">
+                <h6 class="text-emerald-green fw-bold mb-2">Internal Notice</h6>
+                <p class="small mb-0 opacity-75">All financing assessments are processed using the latest Model V2.4. Threshold updated on 15/03/2026.</p>
+                <i class="bi bi-shield-check position-absolute bottom-0 end-0 m-3 opacity-10" style="font-size: 4rem;"></i>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
+

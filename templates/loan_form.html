@@ -1,191 +1,292 @@
 {% extends "base.html" %}
+
+{% block title %}New Assessment{% endblock %}
+{% block page_title %}Home Financing Assessment Form{% endblock %}
+
+
 {% block content %}
-<h3 class="fw-bolder mb-4 text-dark" style="letter-spacing: -0.5px;">New Housing Loan Application</h3>
-<div class="row">
-    <div class="col-lg-8">
-        <form id="loanForm" method="POST" action="">
-            <!-- Financial Information Card -->
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-body p-4 p-md-5">
-                    <h5 class="text-primary fw-bold mb-4 d-flex align-items-center">
-                        <span class="bg-primary bg-opacity-10 p-2 rounded-3 me-3 text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cash-stack" viewBox="0 0 16 16">
-                                <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
-                                <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z"/>
-                            </svg>
-                        </span>
-                        Financial Information
-                    </h5>
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Applicant Income ($)</label>
-                            <input type="number" step="0.01" name="income" class="form-control form-control-lg bg-light" required placeholder="e.g. 5000">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Coapplicant Income ($)</label>
-                            <input type="number" step="0.01" name="coapplicant_income" class="form-control form-control-lg bg-light" required value="0">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Loan Amount ($)</label>
-                            <input type="number" step="0.01" name="loan_amount" class="form-control form-control-lg bg-light" required placeholder="e.g. 150000">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Loan Term (Months)</label>
-                            <input type="number" step="1" name="loan_term" class="form-control form-control-lg bg-light" required value="360">
-                        </div>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card border-0 shadow-lg overflow-hidden mb-5">
+            <div class="card-header bg-navy text-white p-4" style="background: var(--primary-navy)">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-emerald-green p-2 rounded-3">
+                        <i class="bi bi-file-earmark-medical text-white fs-4"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">Application Reference: <span class="text-emerald-green">NEW-2026-001</span></h4>
+                        <p class="mb-0 small text-white-50">Please fill in all required fields accurately for precise ML prediction.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Personal Information Card -->
-            <div class="card shadow-sm border-0 rounded-4 mb-4">
-                <div class="card-body p-4 p-md-5">
-                    <h5 class="text-primary fw-bold mb-4 d-flex align-items-center">
-                        <span class="bg-primary bg-opacity-10 p-2 rounded-3 me-3 text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person-badge" viewBox="0 0 16 16">
-                                <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-                                <path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0h-7zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492V2.5z"/>
-                            </svg>
-                        </span>
-                        Personal Information
+            <form id="assessmentForm" class="p-4 p-md-5" method="POST">
+                <!-- Section A: Personal Information -->
+                <div class="form-section mb-5">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-person-circle"></i> Section A: Personal Information
                     </h5>
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Education</label>
-                            <select name="education" class="form-select form-control-lg bg-light" required>
-                                <option value="Graduate">Graduate</option>
-                                <option value="Not Graduate">Not Graduate</option>
-                            </select>
+                            <label class="form-label">Applicant Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" class="form-control" required placeholder="As per NRIC">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Married</label>
-                            <select name="married" class="form-select form-control-lg bg-light" required>
-                                <option value="Yes">Yes</option>
-                                <option value="No">No</option>
+                            <label class="form-label">NRIC / ID Number <span class="text-danger">*</span></label>
+                            <input type="text" name="nric" class="form-control" required placeholder="e.g. 900101-01-1234">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Age <span class="text-danger">*</span></label>
+                            <input type="number" name="age" class="form-control" required min="18" max="75">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Gender <span class="text-danger">*</span></label>
+                            <select name="gender" class="form-select" required>
+                                <option value="" selected disabled>Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Dependents</label>
-                            <select name="dependents" class="form-select form-control-lg bg-light" required>
-                                <option value="0">0</option>
+                        <div class="col-md-3">
+                            <label class="form-label">Married <span class="text-danger">*</span></label>
+                            <select name="married" class="form-select" required>
+                                <option value="No">Single</option>
+                                <option value="Yes">Married</option>
+                                <option value="Divorced">Divorced</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Dependents <span class="text-danger">*</span></label>
+                            <select name="dependents" class="form-select" required>
+                                <option value="0">None</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
-                                <option value="3+">3+</option>
+                                <option value="3+">3 or more</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">Property Area</label>
-                            <select name="property_area" class="form-select form-control-lg bg-light" required>
-                                <option value="Urban">Urban</option>
-                                <option value="Semiurban">Semiurban</option>
-                                <option value="Rural">Rural</option>
+                            <label class="form-label">Education <span class="text-danger">*</span></label>
+                            <select name="education" class="form-select" required>
+                                <option value="Graduate">Graduate</option>
+                                <option value="Not Graduate">Non-Graduate</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">State of Residence <span class="text-danger">*</span></label>
+                            <select name="state" class="form-select" required>
+                                <option value="" selected disabled>Select State</option>
+                                <option value="Selangor">Selangor</option>
+                                <option value="WP Kuala Lumpur">WP Kuala Lumpur</option>
+                                <option value="Johor">Johor</option>
+                                <option value="Penang">Penang</option>
+                                <option value="Perak">Perak</option>
+                                <option value="Kedah">Kedah</option>
+                                <option value="Melaka">Melaka</option>
+                                <option value="Negeri Sembilan">Negeri Sembilan</option>
+                                <option value="Pahang">Pahang</option>
+                                <option value="Perlis">Perlis</option>
+                                <option value="Kelantan">Kelantan</option>
+                                <option value="Terengganu">Terengganu</option>
+                                <option value="Sabah">Sabah</option>
+                                <option value="Sarawak">Sarawak</option>
+                                <option value="WP Putrajaya">WP Putrajaya</option>
+                                <option value="WP Labuan">WP Labuan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bumiputera Status <span class="text-danger">*</span></label>
+                            <div class="d-flex gap-4 pt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="bumi_status" id="bumiYes" value="Yes" required>
+                                    <label class="form-check-label small fw-semibold" for="bumiYes">Bumiputera</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="bumi_status" id="bumiNo" value="No" checked>
+                                    <label class="form-check-label small fw-semibold" for="bumiNo">Non-Bumiputera</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Section B: Employment and Income -->
+                <div class="form-section mb-5">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-briefcase-fill"></i> Section B: Employment and Income
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Employment Sector <span class="text-danger">*</span></label>
+                            <select name="employment_sector" class="form-select" required>
+                                <option value="Private">Private Sector (MNC/SME)</option>
+                                <option value="Government">Government (Federal/State)</option>
+                                <option value="Statutory">Statutory Body / GLC</option>
+                                <option value="Professional">Professional (Medical/Law/etc)</option>
+                                <option value="Self-Employed">Self-Employed / Business</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">LPPSA Eligible? <span class="text-danger">*</span></label>
+                            <select name="lppsa_eligible" class="form-select" required>
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Years Employed <span class="text-danger">*</span></label>
+                            <input type="number" name="years_employed" class="form-control" required min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Monthly Gross Income (RM) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">RM</span>
+                                <input type="number" step="0.01" name="income" class="form-control" required placeholder="0.00">
+                            </div>
+                            <small class="text-muted">Basic + Fixed Allowance</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Co-applicant/Joint Income (RM)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">RM</span>
+                                <input type="number" step="0.01" name="coapplicant_income" class="form-control" value="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Current Monthly Commitments (RM)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">RM</span>
+                                <input type="number" step="0.01" name="monthly_commitments" class="form-control" placeholder="Car, personal loans, etc.">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C: Credit and Financial Assessment -->
+                <div class="form-section mb-5">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-credit-card-2-front-fill"></i> Section C: Credit and Financial Assessment
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <label class="form-label">Credit Score (Estimate) <span class="text-danger">*</span></label>
+                            <input type="number" name="credit_score_numeric" class="form-control" placeholder="e.g. 700" min="300" max="850">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">CCRIS / CTOS Issues <span class="text-danger">*</span></label>
+                            <select name="credit_history" class="form-select" required>
+                                <option value="1.0">Clean (No Arrears)</option>
+                                <option value="0.0">History of Arrears/SAA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">DSR (%) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="dsr" class="form-control" placeholder="e.g. 45.0">
+                                <span class="input-group-text bg-light fw-bold">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Joint Application <span class="text-danger">*</span></label>
+                            <select name="joint_applicant" class="form-select" required>
+                                <option value="No">Single</option>
+                                <option value="Yes">Joint Applicant</option>
                             </select>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="d-flex justify-content-end mb-5">
-                <a href="{{ url_for('main.dashboard') }}" class="btn btn-light btn-lg text-muted fw-bold me-3 px-4">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-lg fw-bold px-5 shadow">Get Prediction Analysis</button>
-            </div>
-        </form>
-    </div>
 
-    <!-- Right Sidebar - Credit Score Widget -->
-    <div class="col-lg-4 mb-4">
-        <div class="card shadow-sm border-0 rounded-4 sticky-top" style="top: 2rem;">
-            <div class="card-body p-4 text-center">
-                <h6 class="text-uppercase fw-bold text-muted mb-4 pb-2 border-bottom">Credit Score Assessment</h6>
-                
-                <div class="d-flex justify-content-center position-relative my-4">
-                    <!-- SVG Half Circle Gauge -->
-                    <svg viewBox="0 0 200 110" style="width: 100%; max-width: 250px; overflow: visible;">
-                        <!-- Background Track -->
-                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e2e8f0" stroke-width="25" stroke-linecap="round" />
-                        
-                        <!-- Segments -->
-                        <!-- Poor (300-580) -->
-                        <path d="M 20 100 A 80 80 0 0 1 50.6 35.8" fill="none" stroke="#ef4444" stroke-width="25" stroke-linecap="round" />
-                        <!-- Fair (581-649) -->
-                        <path d="M 50.6 35.8 A 80 80 0 0 1 100 20" fill="none" stroke="#f59e0b" stroke-width="25" stroke-linecap="butt" />
-                        <!-- Good (650-699) -->
-                        <path d="M 100 20 A 80 80 0 0 1 149.4 35.8" fill="none" stroke="#3b82f6" stroke-width="25" stroke-linecap="butt" />
-                        <!-- Excellent (700-850) -->
-                        <path d="M 149.4 35.8 A 80 80 0 0 1 180 100" fill="none" stroke="#22c55e" stroke-width="25" stroke-linecap="round" />
 
-                        <!-- Gauge Needle -->
-                        <g id="needleGroup" style="transform-origin: 100px 100px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                            <circle cx="100" cy="100" r="10" fill="#1e293b" />
-                            <circle cx="100" cy="100" r="4" fill="#ffffff" />
-                            <polygon points="97,100 103,100 100,25" fill="#1e293b" />
-                        </g>
-                        
-                    </svg>
+                <!-- Section D: Property and Financing Details -->
+                <div class="form-section mb-5">
+                    <h5 class="form-section-title">
+                        <i class="bi bi-house-fill"></i> Section D: Property and Financing Details
+                    </h5>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Financing Amount (RM) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">RM</span>
+                                <input type="number" step="0.01" name="loan_amount" class="form-control" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Amount Term (Months) <span class="text-danger">*</span></label>
+                            <input type="number" name="loan_term" class="form-control" required value="360">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Financing Type <span class="text-danger">*</span></label>
+                            <select name="financing_type" class="form-select" required>
+                                <option value="Islamic">Islamic (Shariah)</option>
+                                <option value="Conventional">Conventional</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Property Value (RM) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light fw-bold">RM</span>
+                                <input type="number" step="0.01" name="property_value" class="form-control" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Margin of Financing <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" name="margin" class="form-control" value="90.0">
+                                <span class="input-group-text bg-light fw-bold">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Property Type <span class="text-danger">*</span></label>
+                            <select name="property_type" class="form-select" required>
+                                <option value="Terrace">Terrace House</option>
+                                <option value="Condominium">Condominium</option>
+                                <option value="Apartment">Apartment</option>
+                                <option value="Bungalow">Bungalow</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Property Location Context <span class="text-danger">*</span></label>
+                            <select name="property_area" class="form-select" required>
+                                <option value="Urban">City Center / Major Hub (Stricter NDI)</option>
+                                <option value="Semiurban">Town / Suburbs (Standard NDI)</option>
+                                <option value="Rural">Regional Area / Outskirts (Flexible NDI)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Purpose of Financing <span class="text-danger">*</span></label>
+                            <select name="purpose" class="form-select" required>
+                                <option value="Own Stay">Own Stay</option>
+                                <option value="Investment">Investment</option>
+                                <option value="Refinancing">Refinancing</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mb-2">
-                    <span id="scoreValue" class="display-5 fw-bolder text-dark">750</span>
-                    <div id="scoreBadge" class="badge bg-success bg-opacity-10 text-success fs-6 px-3 py-2 rounded-pill mt-2 border border-success border-opacity-25">Excellent</div>
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center pt-4 border-top mt-2">
+                    <button type="reset" class="btn btn-light px-4 py-2 fw-bold"><i class="bi bi-arrow-counterclockwise"></i> Reset Form</button>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-navy px-4 py-2 fw-bold shadow-sm" id="btnValidate"><i class="bi bi-shield-check"></i> Validate Data</button>
+                        <button type="submit" class="btn btn-primary px-5 py-2 fw-bold shadow-lg" id="btnSubmit">Submit for Prediction <i class="bi bi-magic ms-2"></i></button>
+                    </div>
                 </div>
-                
-                <p class="text-muted small mt-3 px-2">Adjust your estimated Credit Score using the slider below. Higher scores improve loan approval odds.</p>
-
-                <div class="mt-4 px-3">
-                    <input type="range" class="form-range" id="creditScoreSlider" min="300" max="850" value="750">
-                    <input type="hidden" form="loanForm" name="credit_history" id="creditHistoryInput" value="1.0">
-                </div>
-                
-                <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const slider = document.getElementById('creditScoreSlider');
-                        const needle = document.getElementById('needleGroup');
-                        const scoreText = document.getElementById('scoreValue');
-                        const scoreBadge = document.getElementById('scoreBadge');
-                        const hiddenInput = document.getElementById('creditHistoryInput');
-                        const form = document.querySelector('form');
-                        
-                        // Attach the hidden input to the form directly via JS fallback just in case
-                        form.appendChild(hiddenInput);
-
-                        function updateGauge(score) {
-                            let percentage = (score - 300) / 550;
-                            let degrees = (percentage * 180) - 90;
-                            
-                            needle.style.transform = `rotate(${degrees}deg)`;
-                            scoreText.innerText = score;
-
-                            if (score < 581) {
-                                scoreBadge.className = 'badge bg-danger bg-opacity-10 text-danger fs-6 px-3 py-2 rounded-pill mt-2 border border-danger border-opacity-25';
-                                scoreBadge.innerText = 'Poor';
-                                scoreText.style.color = '#ef4444';
-                            } else if (score < 650) {
-                                scoreBadge.className = 'badge bg-warning bg-opacity-10 text-warning fs-6 px-3 py-2 rounded-pill mt-2 border border-warning border-opacity-50';
-                                scoreBadge.innerText = 'Fair';
-                                scoreText.style.color = '#f59e0b';
-                            } else if (score < 700) {
-                                scoreBadge.className = 'badge bg-primary bg-opacity-10 text-primary fs-6 px-3 py-2 rounded-pill mt-2 border border-primary border-opacity-25';
-                                scoreBadge.innerText = 'Good';
-                                scoreText.style.color = '#3b82f6';
-                            } else {
-                                scoreBadge.className = 'badge bg-success bg-opacity-10 text-success fs-6 px-3 py-2 rounded-pill mt-2 border border-success border-opacity-25';
-                                scoreBadge.innerText = 'Excellent';
-                                scoreText.style.color = '#22c55e';
-                            }
-                            
-                            // Send the actual raw score
-                            hiddenInput.value = score;
-                        }
-
-                        slider.addEventListener('input', function() {
-                            updateGauge(this.value);
-                        });
-
-                        updateGauge(slider.value);
-                    });
-                </script>
-            </div>
+            </form>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing AI Analysis...';
+    });
+</script>
+{% endblock %}
+

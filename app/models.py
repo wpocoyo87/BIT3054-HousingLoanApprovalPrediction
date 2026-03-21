@@ -15,17 +15,46 @@ class User(UserMixin, me.Document):
 class LoanApplication(me.Document):
     meta = {'collection': 'loan_applications', 'strict': False}
     user = me.ReferenceField(User, required=True, reverse_delete_rule=me.CASCADE)
-    income = me.FloatField(required=True)
-    coapplicant_income = me.FloatField(required=True)
-    loan_amount = me.FloatField(required=True)
-    loan_term = me.FloatField(required=True)
-    credit_score = me.FloatField(required=True)
-    education = me.StringField(required=True, max_length=50)
-    married = me.StringField(required=True, max_length=10)
-    dependents = me.StringField(required=True, max_length=10)
-    property_area = me.StringField(required=True, max_length=50)
+    
+    # Personal info
+    full_name = me.StringField(max_length=150)
+    nric = me.StringField(max_length=20)
+    age = me.IntField()
+    gender = me.StringField(max_length=20)
+    married = me.StringField(max_length=20)
+    dependents = me.StringField(max_length=20)
+    education = me.StringField(max_length=50)
+    state = me.StringField(max_length=50)
+    bumi_status = me.StringField(max_length=10)
+    
+    # Financial info
+    employment_sector = me.StringField(max_length=50)
+    lppsa_eligible = me.StringField(max_length=10)
+    years_employed = me.IntField()
+
+    income = me.FloatField()
+    coapplicant_income = me.FloatField(default=0.0)
+    monthly_commitments = me.FloatField(default=0.0)
+    dsr = me.FloatField()
+    ndi = me.FloatField()
+    joint_applicant = me.StringField(max_length=10)
+
+    
+    # Financing info
+    loan_amount = me.FloatField()
+    loan_term = me.IntField()
+    financing_type = me.StringField(max_length=20)
+    property_value = me.FloatField()
+    margin = me.FloatField()
+    property_type = me.StringField(max_length=50)
+    property_area = me.StringField(max_length=50)
+    purpose = me.StringField(max_length=50)
+    
+    # Prediction
+    credit_score = me.FloatField()
     prediction = me.StringField(max_length=50, null=True)
     created_at = me.DateTimeField(default=datetime.utcnow)
+
 
 class Prediction(me.Document):
     meta = {'collection': 'predictions'}
