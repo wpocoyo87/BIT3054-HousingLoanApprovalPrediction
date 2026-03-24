@@ -26,6 +26,9 @@ class LoanApplication(me.Document):
     education = me.StringField(max_length=50)
     state = me.StringField(max_length=50)
     bumi_status = me.StringField(max_length=10)
+    property_count = me.IntField(default=1) # 1, 2, 3+ 
+    ccris_status = me.StringField(default='clean', max_length=50) # 'clean', 'late_payment', 'arrears'
+    location_type = me.StringField(max_length=50, default='City Center / Major Hub')
     
     # Financial info
     employment_sector = me.StringField(max_length=50)
@@ -35,8 +38,8 @@ class LoanApplication(me.Document):
     income = me.FloatField()
     coapplicant_income = me.FloatField(default=0.0)
     monthly_commitments = me.FloatField(default=0.0)
-    dsr = me.FloatField()
-    ndi = me.FloatField()
+    dsr = me.FloatField(default=0.0)
+    ndi = me.FloatField(default=0.0)
     joint_applicant = me.StringField(max_length=10)
 
     

@@ -20,6 +20,11 @@
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+    --emerald-green-subtle: #ecfdf5;
+    --primary-subtle: #eff6ff;
+    --warning-subtle: #fffbeb;
+    --info-subtle: #f0f9ff;
 }
 
 body {
@@ -269,6 +274,35 @@ body {
     color: #fff;
 }
 
+.btn-emerald-green {
+    background-color: var(--emerald-green);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.625rem 1.5rem;
+    font-weight: 600;
+}
+
+.btn-emerald-green:hover {
+    background-color: var(--emerald-dark);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.btn-outline-navy {
+    background-color: transparent;
+    color: var(--primary-navy);
+    border: 2px solid var(--primary-navy);
+    border-radius: 10px;
+    padding: 0.625rem 1.5rem;
+    font-weight: 600;
+}
+
+.btn-outline-navy:hover {
+    background-color: var(--primary-navy);
+    color: #fff;
+}
+
 /* Badges */
 .badge-approved {
     background-color: var(--emerald-light);
@@ -332,6 +366,12 @@ body {
 .bg-secondary-navy { background-color: var(--secondary-navy) !important; }
 .bg-emerald-green { background-color: var(--emerald-green) !important; }
 .bg-emerald-light { background-color: var(--emerald-light) !important; }
+
+.bg-emerald-green-subtle { background-color: var(--emerald-green-subtle) !important; }
+.bg-primary-subtle { background-color: var(--primary-subtle) !important; }
+.bg-warning-subtle { background-color: var(--warning-subtle) !important; }
+.bg-info-subtle { background-color: var(--info-subtle) !important; }
+
 .text-navy { color: var(--primary-navy) !important; }
 .text-emerald-green { color: var(--emerald-green) !important; }
 

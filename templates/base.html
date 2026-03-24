@@ -65,6 +65,11 @@
                         <i class="bi bi-person-fill-gear"></i> User Management
                     </a>
                 </li>
+                <li class="{% if request.endpoint == 'main.bank_requirements' %}active{% endif %}">
+                    <a href="{{ url_for('main.bank_requirements') }}">
+                        <i class="bi bi-journal-text"></i> Bank Requirements
+                    </a>
+                </li>
                 {% endif %}
 
                 <div class="sidebar-section-label px-4 mt-4 mb-2 small text-uppercase text-white-50 fw-bold">Account</div>

@@ -82,7 +82,36 @@ With 573 "True Approved" cases, the model is highly sensitive to identifying goo
 ---
 
 ## 8. Deployment and Multi-Role Access
-### 8.1 Role Definitions
+### 8.1 Bank Recommendation Engine (Auto-Ranking Model)
+The system transcends simple "Approved/Rejected" binary outputs by implementing a **Multi-Factor Scoring Model** (Ranked Selection). This engine simulates the consultancy logic of a property agent:
+*   **Eligibility (40%)**: Cross-referencing applicant DSR against 10+ Malaysian banks' specific internal DSR caps.
+*   **Pricing (30%)**: Prioritizing banks with lower base rates (e.g., Public Bank vs. Commercial Banks).
+*   **Property & Location Risk (15%)**: Incorporating the "Liquidity" of the location (Prime vs. Remote).
+*   **Product Fit (15%)**: Matching Islamic/Conventional preferences and NDI buffers (e.g., Bank Islam, Affin).
+
+### 8.2 Supported Financial Institutions (FI)
+The system currently implements scoring logic for the following Malaysian lenders:
+| FI Name | Type | Key Strength |
+| :--- | :--- | :--- |
+| **Maybank / CIMB** | Conventional + Islamic | Universal banking with standard DSR caps. |
+| **Public Bank** | Conventional-heavy | Competitive rates for low-risk profiles. |
+| **Bank Islam / Affin** | Islamic Only | Specialized Shariah-compliant financing. |
+| **Hong Leong / RHB** | Conventional + Islamic | Flexible for professional background sectors. |
+| **Alliance / AmBank** | Conventional + Islamic | Strong middle-market and SME focus. |
+| **LPPSA (Gov)** | Specialized | High DSR allowance (80%) for civil servants. |
+| **UOB / OCBC** | Conventional | Focused on high-NDI/premium urban property. |
+
+### 8.3 Expert Business Logic: Dual-Constraint Affordability
+The system implements a professional "Full Affordability Engine" that considers the interaction between two critical metrics:
+*   **DSR (Debt Service Ratio)**: Measures the applicant's capacity to service the loan relative to income.
+*   **NDI (Net Disposable Income)**: Measures the actual "cash left to live" after all deductions and loan installments.
+
+The engine uses a **Binding Constraint** logic—if either DSR fails or NDI falls below the bank’s household-adjusted buffer, the application is flagged. The model adjusts the NDI buffer based on:
+1.  **Household Size**: Higher buffers for families with 2+ dependents.
+2.  **Cost of Living**: Urban areas (Kuala Lumpur, PJ, JB) require an additional RM200-RM300 buffer.
+3.  **Income Tier**: High-income earners receive more flexibility in relative DSR caps.
+
+### 8.4 Role Definitions
 1.  **User (Agent/Staff)**:
     *   Can create new assessment records.
     *   View real-time predictions with confidence scores.

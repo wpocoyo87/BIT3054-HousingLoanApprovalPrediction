@@ -26,8 +26,8 @@
     </div>
     <div class="col-md-3">
         <div class="card stat-card border-0">
-            <div class="stat-icon bg-navy bg-opacity-10 text-navy" style="background: rgba(10, 25, 47, 0.1);">
-                <i class="bi bi-files"></i>
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
+                <i class="bi bi-file-earmark-text-fill"></i>
             </div>
             <div class="stat-value">{{ applications|length }}</div>
             <div class="stat-label">Total Applications</div>
@@ -61,11 +61,11 @@
                     </div>
                     <div class="col-md-3 border-end p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">Accuracy</p>
-                        <h6 class="fw-800 text-emerald-green mb-0">94.6%</h6>
+                        <h6 class="fw-800 text-emerald-green mb-0">93.5%</h6>
                     </div>
                     <div class="col-md-3 border-end p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">F1 Score</p>
-                        <h6 class="fw-800 text-emerald-green mb-0">0.93</h6>
+                        <h6 class="fw-800 text-emerald-green mb-0">0.91</h6>
                     </div>
                     <div class="col-md-3 p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">Last Retrained</p>
@@ -83,12 +83,17 @@
     <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0">System-wide Prediction Logs</h5>
         <div class="d-flex gap-2">
-            <button class="btn btn-light btn-sm px-3 rounded-pill"><i class="bi bi-filter me-1"></i> Filter</button>
-            <button class="btn btn-emerald-green btn-sm px-3 text-white rounded-pill"><i class="bi bi-download me-1"></i> Export CSV</button>
+            <div class="input-group input-group-sm" style="width: 200px;">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="logSearch" class="form-control border-start-0 ps-0" placeholder="Filter logs...">
+            </div>
+            <button class="btn btn-emerald-green btn-sm px-3 text-white rounded-pill shadow-sm" id="btnExportCSV">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </button>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0" id="logTable">
             <thead class="bg-light">
                 <tr>
                     <th class="ps-4 py-3 small text-uppercase text-muted fw-800">Ref ID</th>
@@ -139,5 +144,51 @@
         <a href="#" class="small fw-bold text-emerald-green text-decoration-none">View All Network Records <i class="bi bi-arrow-right ms-1"></i></a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Search/Filter Logic
+    const searchInput = document.getElementById('logSearch');
+    const table = document.getElementById('logTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        
+        Array.from(rows).forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+
+    // 2. Export CSV Logic
+    document.getElementById('btnExportCSV').addEventListener('click', function() {
+        let csv = [];
+        const rows = document.querySelectorAll("#logTable tr");
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            
+            for (let j = 0; j < cols.length; j++) {
+                // Clean data for CSV
+                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s+)/gm, ' ');
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
+        }
+
+        const csvString = csv.join("\n");
+        const a = document.createElement("a");
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+        a.target = '_blank';
+        a.download = 'housing_loan_prediction_logs.csv';
+        document.body.appendChild(a);
+        a.click();
+    });
+});
+</script>
 {% endblock %}
 

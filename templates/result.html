@@ -7,10 +7,10 @@
 <div class="row g-4 justify-content-center">
     <div class="col-lg-10">
         <!-- Main Decision Card -->
-        <div class="card border-0 shadow-lg overflow-hidden mb-5">
+        <div class="card border-0 shadow-lg overflow-hidden mb-5" id="printableCard">
             <div class="row g-0">
-                <div class="col-md-4 text-white p-5 d-flex flex-column align-items-center justify-content-center text-center" 
-                     style="background: {% if application.prediction == 'Approved' %}linear-gradient(135deg, #10b981 0%, #065f46 100%){% else %}linear-gradient(135deg, #ef4444 0%, #991b1b 100%){% endif %}; min-height: 400px;">
+                <div class="col-md-4 text-white p-5 d-flex flex-column align-items-center justify-content-center text-center"
+                    style="background: {% if application.prediction == 'Approved' %}linear-gradient(135deg, #10b981 0%, #065f46 100%){% else %}linear-gradient(135deg, #ef4444 0%, #991b1b 100%){% endif %}; min-height: 400px;">
                     <div class="bg-white bg-opacity-20 p-4 rounded-circle mb-4">
                         {% if application.prediction == 'Approved' %}
                         <i class="bi bi-shield-check text-white" style="font-size: 5rem;"></i>
@@ -20,7 +20,7 @@
                     </div>
                     <h1 class="display-6 fw-800 mb-2">{{ application.prediction | upper }}</h1>
                     <p class="mb-4 opacity-75 fw-bold">System Generated Prediction</p>
-                    
+
                     <div class="w-100 px-4">
                         <div class="d-flex justify-content-between mb-2 small fw-bold">
                             <span>Confidence Score</span>
@@ -31,21 +31,24 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8 p-5">
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
                             <h4 class="text-navy fw-800 mb-1">Assessment Summary</h4>
-                            <p class="text-muted small">Reference: #{{ (application.id | string)[-6:] | upper }} • Processed on {{ application.created_at.strftime('%d %b %Y') }}</p>
+                            <p class="text-muted small">Reference: #{{ (application.id | string)[-6:] | upper }} •
+                                Processed on {{ application.created_at.strftime('%d %b %Y') }}</p>
                         </div>
-                        <span class="badge {% if application.prediction == 'Approved' %}badge-approved{% else %}badge-rejected{% endif %} fs-6">
+                        <span
+                            class="badge {% if application.prediction == 'Approved' %}badge-approved{% else %}badge-rejected{% endif %} fs-6">
                             {% if application.prediction == 'Approved' %}Low Risk{% else %}High Risk{% endif %}
                         </span>
                     </div>
 
                     <div class="row g-4 mb-5">
                         <div class="col-sm-6">
-                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Applicant Profile</h6>
+                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Applicant Profile
+                            </h6>
                             <div class="vstack gap-2">
                                 <div class="d-flex justify-content-between">
                                     <span class="small text-muted">Income:</span>
@@ -53,24 +56,35 @@
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="small text-muted">Credit History:</span>
-                                    <span class="small fw-bold">{% if application.credit_score >= 1.0 %}Excellent{% else %}Requires Attention{% endif %}</span>
+                                    <span class="small fw-bold">{% if application.credit_score >= 1.0 %}Excellent{% else
+                                        %}Requires Attention{% endif %}</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="small text-muted">DSR:</span>
-                                    <span class="small fw-bold {% if application.dsr > 70 %}text-danger{% else %}text-emerald-green{% endif %}">{{ "%.1f"|format(application.dsr) }}%</span>
+                                    <span
+                                        class="small fw-bold {% if application.dsr and application.dsr > 70 %}text-danger{% else %}text-emerald-green{% endif %}">{{
+                                        "%.1f"|format(application.dsr or 0) }}%</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="small text-muted">NDI:</span>
-                                    <span class="small fw-bold {% if application.ndi < 2000 %}text-danger{% else %}text-emerald-green{% endif %}">RM {{ "{:,.2f}".format(application.ndi) }}</span>
+                                    <span
+                                        class="small fw-bold {% if application.ndi and application.ndi < 1200 %}text-danger{% else %}text-emerald-green{% endif %}">RM
+                                        {{ "{:,.2f}".format(application.ndi or 0) }}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 border-start ps-md-4">
-                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Financing Details</h6>
+                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Financing Details
+                            </h6>
                             <div class="vstack gap-2">
                                 <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Property Value:</span>
+                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.property_value or 0) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
                                     <span class="small text-muted">Loan Amount:</span>
-                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.loan_amount) }}</span>
+                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.loan_amount)
+                                        }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="small text-muted">Margin:</span>
@@ -87,37 +101,113 @@
 
                     <div class="p-4 rounded-4 bg-light">
                         <h6 class="fw-bold text-navy mb-3"><i class="bi bi-robot me-2"></i> Model Explanation (AI Insights)</h6>
-                        {% if application.prediction == 'Approved' %}
                         <ul class="list-unstyled mb-0 small vstack gap-2">
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-plus-circle text-emerald-green"></i> Strong credit profile meets Malaysia banking score standard.</li>
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-plus-circle text-emerald-green"></i> Monthly income provides healthy buffer for proposed repayment.</li>
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-info-circle text-navy"></i> Stable employment history in the public sector detected.</li>
+                            {% for insight in ai_insights %}
+                            <li class="d-flex align-items-center gap-2">
+                                <i class="bi {{ 'bi-check-circle-fill text-emerald-green' if insight.type == 'success' else 'bi-exclamation-triangle-fill text-danger' if insight.type == 'danger' else 'bi-info-circle-fill text-navy' }}"></i>
+                                {{ insight.text }}
+                            </li>
+                            {% endfor %}
                         </ul>
-                        {% else %}
-                        <ul class="list-unstyled mb-0 small vstack gap-2">
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-danger"></i> Credit history score is below minimum financing threshold.</li>
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-exclamation-triangle-fill text-danger"></i> DSR exceeds the maximum recommended 60% limit for this income bracket.</li>
-                            <li class="d-flex align-items-center gap-2"><i class="bi bi-info-circle text-navy"></i> High property value to income ratio detected.</li>
-                        </ul>
-                        {% endif %}
                     </div>
+
+                    {% if recommended_price > 0 %}
+                    <div class="mt-4 p-4 rounded-4 bg-navy text-white shadow-lg">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold mb-0">Affordability Insight</h6>
+                            <span class="x-small opacity-75 fw-bold text-uppercase">Best Value Match</span>
+                        </div>
+                        <p class="x-small opacity-75 mb-3">Based on your financial profile, we recommend a purchase price up to:</p>
+                        <h4 class="fw-800 mb-0">RM {{ "{:,.0f}".format(recommended_price) }}</h4>
+                    </div>
+                    {% endif %}
+
+                    {% if suggested_banks %}
+                    <div class="mt-4 p-4 rounded-4" style="background-color: #f0fdf4; border: 1px solid #dcfce7;">
+                        <h6 class="fw-bold text-emerald-green mb-3"><i class="bi bi-bank me-2"></i> Recommended
+                            Financial Institutions (FI)</h6>
+                        <div class="vstack gap-3">
+                            {% for bank in suggested_banks %}
+                            <div
+                                class="d-flex align-items-center gap-4 p-3 rounded-4 hover-bg-light transition-all bg-white border border-success border-opacity-10 shadow-sm mb-2">
+                                <div class="bg-light p-3 rounded-circle shadow-sm"
+                                    style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-bank2 text-navy fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="mb-0 fw-800 text-navy">{{ bank.name }}</h6>
+                                        <div class="text-end">
+                                            <span
+                                                class="badge rounded-pill bg-emerald-green bg-opacity-10 text-emerald-green border border-success border-opacity-25 px-3 mb-1">{{
+                                                bank.score }}% Match</span>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2 x-small text-muted" style="line-height: 1.4;"><i
+                                            class="bi bi-info-circle me-1"></i> {{ bank.reason }}</p>
+
+                                    <div class="d-flex gap-4">
+                                        <div>
+                                            <span class="text-muted x-small d-block fw-bold text-uppercase">Monthly
+                                                Pay</span>
+                                            <span class="text-emerald-green fw-800 small">RM {{
+                                                "{:,.2f}".format(bank.installment) }}</span>
+                                        </div>
+                                        <div class="border-start ps-4">
+                                            <span class="text-muted x-small d-block fw-bold text-uppercase">Est.
+                                                Rate</span>
+                                            <span class="text-navy fw-800 small">{{ bank.rate }}% p.a.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
-            
+
+
             <div class="card-footer bg-white border-top-0 p-4 border-top">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <button class="btn btn-light px-4 fw-bold rounded-pill border me-2"><i class="bi bi-printer me-2"></i> Print Summary</button>
-                        <button class="btn btn-light px-4 fw-bold rounded-pill border"><i class="bi bi-download me-2"></i> PDF Report</button>
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border me-2" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i> Print Summary
+                        </button>
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border" id="btnDownloadPDF">
+                            <i class="bi bi-download me-2"></i> PDF Report
+                        </button>
                     </div>
                     <div>
-                        <a href="{{ url_for('main.loan_form') }}" class="btn btn-navy px-4 fw-bold rounded-pill me-2">New Assessment</a>
-                        <a href="{{ url_for('main.dashboard') }}" class="btn btn-emerald-green text-white px-5 fw-bold rounded-pill shadow">Save Record</a>
+                        <a href="{{ url_for('main.loan_form', id=application.id) }}"
+                            class="btn btn-outline-navy px-4 fw-bold rounded-pill me-2">Edit Analysis</a>
+                        <a href="{{ url_for('main.loan_form') }}"
+                            class="btn btn-navy px-4 fw-bold rounded-pill me-2">New Assessment</a>
+                        <a href="{{ url_for('main.dashboard') }}"
+                            class="btn btn-emerald-green text-white px-5 fw-bold rounded-pill shadow">Save Record</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    document.getElementById('btnDownloadPDF').addEventListener('click', function() {
+        const element = document.getElementById('printableCard');
+        const opt = {
+            margin:       0.5,
+            filename:     'Financing_Assessment_{{ (application.id | string)[-6:] | upper }}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
 
+        // New Promise-based usage:
+        html2pdf().set(opt).from(element).save();
+    });
+</script>
+{% endblock %}
+{% endblock %}

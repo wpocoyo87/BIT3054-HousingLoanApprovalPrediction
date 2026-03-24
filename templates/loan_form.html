@@ -29,47 +29,47 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label class="form-label">Applicant Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="full_name" class="form-control" required placeholder="As per NRIC">
+                            <input type="text" name="full_name" class="form-control" required placeholder="As per NRIC" value="{{ application.full_name if application else '' }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">NRIC / ID Number <span class="text-danger">*</span></label>
-                            <input type="text" name="nric" class="form-control" required placeholder="e.g. 900101-01-1234">
+                            <input type="text" name="nric" class="form-control" required placeholder="e.g. 900101-01-1234" value="{{ application.nric if application else '' }}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Age <span class="text-danger">*</span></label>
-                            <input type="number" name="age" class="form-control" required min="18" max="75">
+                            <input type="number" name="age" class="form-control" required min="18" max="75" value="{{ application.age if application else '' }}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Gender <span class="text-danger">*</span></label>
                             <select name="gender" class="form-select" required>
                                 <option value="" selected disabled>Select</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
+                                <option value="Male" {% if application.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if application.gender == 'Female' %}selected{% endif %}>Female</option>
+                                <option value="Other" {% if application.gender == 'Other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Married <span class="text-danger">*</span></label>
                             <select name="married" class="form-select" required>
-                                <option value="No">Single</option>
-                                <option value="Yes">Married</option>
-                                <option value="Divorced">Divorced</option>
+                                <option value="No" {% if application.married == 'No' %}selected{% endif %}>Single</option>
+                                <option value="Yes" {% if application.married == 'Yes' %}selected{% endif %}>Married</option>
+                                <option value="Divorced" {% if application.married == 'Divorced' %}selected{% endif %}>Divorced</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Dependents <span class="text-danger">*</span></label>
                             <select name="dependents" class="form-select" required>
-                                <option value="0">None</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3+">3 or more</option>
+                                <option value="0" {% if application.dependents == '0' %}selected{% endif %}>None</option>
+                                <option value="1" {% if application.dependents == '1' %}selected{% endif %}>1</option>
+                                <option value="2" {% if application.dependents == '2' %}selected{% endif %}>2</option>
+                                <option value="3+" {% if application.dependents == '3+' %}selected{% endif %}>3 or more</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Education <span class="text-danger">*</span></label>
                             <select name="education" class="form-select" required>
-                                <option value="Graduate">Graduate</option>
-                                <option value="Not Graduate">Non-Graduate</option>
+                                <option value="Graduate" {% if application.education == 'Graduate' %}selected{% endif %}>Graduate</option>
+                                <option value="Not Graduate" {% if application.education == 'Not Graduate' %}selected{% endif %}>Non-Graduate</option>
                             </select>
                         </div>
                         <div class="col-md-6">
@@ -94,18 +94,14 @@
                                 <option value="WP Labuan">WP Labuan</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Bumiputera Status <span class="text-danger">*</span></label>
-                            <div class="d-flex gap-4 pt-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="bumi_status" id="bumiYes" value="Yes" required>
-                                    <label class="form-check-label small fw-semibold" for="bumiYes">Bumiputera</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="bumi_status" id="bumiNo" value="No" checked>
-                                    <label class="form-check-label small fw-semibold" for="bumiNo">Non-Bumiputera</label>
-                                </div>
-                            </div>
+                        <div class="col-md-6 border-start ps-md-4 border-top pt-3 mt-3">
+                            <label class="form-label text-navy fw-800">Residential Property Count <span class="text-danger">*</span></label>
+                            <select name="property_count" class="form-select border-primary-subtle" required>
+                                <option value="1">1 (First Home Buying)</option>
+                                <option value="2">2 (Second Home Buying)</option>
+                                <option value="3">3 or more (Investment Rule Applies)</option>
+                            </select>
+                            <small class="text-muted"><i class="bi bi-info-circle"></i> Affects maximum Margin of Financing (MOF) based on BNM policy.</small>
                         </div>
                     </div>
                 </div>
@@ -120,30 +116,30 @@
                         <div class="col-md-6">
                             <label class="form-label">Employment Sector <span class="text-danger">*</span></label>
                             <select name="employment_sector" class="form-select" required>
-                                <option value="Private">Private Sector (MNC/SME)</option>
-                                <option value="Government">Government (Federal/State)</option>
-                                <option value="Statutory">Statutory Body / GLC</option>
-                                <option value="Professional">Professional (Medical/Law/etc)</option>
-                                <option value="Self-Employed">Self-Employed / Business</option>
+                                <option value="Private" {% if application.employment_sector == 'Private' %}selected{% endif %}>Private Sector (MNC/SME)</option>
+                                <option value="Government" {% if application.employment_sector == 'Government' %}selected{% endif %}>Government (Federal/State)</option>
+                                <option value="Statutory" {% if application.employment_sector == 'Statutory' %}selected{% endif %}>Statutory Body / GLC</option>
+                                <option value="Professional" {% if application.employment_sector == 'Professional' %}selected{% endif %}>Professional (Medical/Law/etc)</option>
+                                <option value="Self-Employed" {% if application.employment_sector == 'Self-Employed' %}selected{% endif %}>Self-Employed / Business</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">LPPSA Eligible? <span class="text-danger">*</span></label>
                             <select name="lppsa_eligible" class="form-select" required>
-                                <option value="No">No</option>
-                                <option value="Yes">Yes</option>
+                                <option value="No" {% if application.lppsa_eligible == 'No' %}selected{% endif %}>No</option>
+                                <option value="Yes" {% if application.lppsa_eligible == 'Yes' %}selected{% endif %}>Yes</option>
                             </select>
                         </div>
 
                         <div class="col-md-3">
                             <label class="form-label">Years Employed <span class="text-danger">*</span></label>
-                            <input type="number" name="years_employed" class="form-control" required min="0">
+                            <input type="number" name="years_employed" class="form-control" required min="0" value="{{ application.years_employed if application else '' }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Monthly Gross Income (RM) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light fw-bold">RM</span>
-                                <input type="number" step="0.01" name="income" class="form-control" required placeholder="0.00">
+                                <input type="number" step="0.01" name="income" class="form-control" required placeholder="0.00" value="{{ application.income if application else '' }}">
                             </div>
                             <small class="text-muted">Basic + Fixed Allowance</small>
                         </div>
@@ -151,14 +147,14 @@
                             <label class="form-label">Co-applicant/Joint Income (RM)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light fw-bold">RM</span>
-                                <input type="number" step="0.01" name="coapplicant_income" class="form-control" value="0.00">
+                                <input type="number" step="0.01" name="coapplicant_income" class="form-control" value="{{ application.coapplicant_income if application else '0.00' }}">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Current Monthly Commitments (RM)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light fw-bold">RM</span>
-                                <input type="number" step="0.01" name="monthly_commitments" class="form-control" placeholder="Car, personal loans, etc.">
+                                <input type="number" step="0.01" name="monthly_commitments" class="form-control" placeholder="Car, personal loans, etc." value="{{ application.monthly_commitments if application else '' }}">
                             </div>
                         </div>
                     </div>
@@ -172,27 +168,28 @@
                     <div class="row g-4">
                         <div class="col-md-3">
                             <label class="form-label">Credit Score (Estimate) <span class="text-danger">*</span></label>
-                            <input type="number" name="credit_score_numeric" class="form-control" placeholder="e.g. 700" min="300" max="850">
+                            <input type="number" name="credit_score_numeric" class="form-control" placeholder="e.g. 700" min="300" max="850" value="{{ application.credit_score if application else '650' }}">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">CCRIS / CTOS Issues <span class="text-danger">*</span></label>
-                            <select name="credit_history" class="form-select" required>
-                                <option value="1.0">Clean (No Arrears)</option>
-                                <option value="0.0">History of Arrears/SAA</option>
+                            <label class="form-label text-navy fw-800">CCRIS / CTOS Detail <span class="text-danger">*</span></label>
+                            <select name="ccris_status" class="form-select border-primary-subtle" required>
+                                <option value="clean" {% if application.ccris_status == 'clean' %}selected{% endif %}>Clean (No Arrears)</option>
+                                <option value="minor" {% if application.ccris_status == 'minor' %}selected{% endif %}>Minor Issues (1-2 months late)</option>
+                                <option value="arrears" {% if application.ccris_status == 'arrears' %}selected{% endif %}>Major Arrears / SAA / AKPK</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">DSR (%) <span class="text-danger">*</span></label>
+                            <label class="form-label">DSR (%) <span class="text-muted small">(Auto-calculated)</span></label>
                             <div class="input-group">
-                                <input type="number" step="0.01" name="dsr" class="form-control" placeholder="e.g. 45.0">
+                                <input type="number" step="0.01" id="dsr_display" name="dsr" class="form-control bg-light" readonly placeholder="Calculated...">
                                 <span class="input-group-text bg-light fw-bold">%</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Joint Application <span class="text-danger">*</span></label>
                             <select name="joint_applicant" class="form-select" required>
-                                <option value="No">Single</option>
-                                <option value="Yes">Joint Applicant</option>
+                                <option value="No" {% if application.joint_applicant == 'No' %}selected{% endif %}>Single</option>
+                                <option value="Yes" {% if application.joint_applicant == 'Yes' %}selected{% endif %}>Joint Applicant</option>
                             </select>
                         </div>
                     </div>
@@ -206,61 +203,75 @@
                     </h5>
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <label class="form-label">Financing Amount (RM) <span class="text-danger">*</span></label>
+                            <label class="form-label">Financing Amount (RM) <span class="text-muted small">(Auto-detected)</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light fw-bold">RM</span>
-                                <input type="number" step="0.01" name="loan_amount" class="form-control" required placeholder="0.00">
+                                <input type="number" step="0.01" id="loan_amount" name="loan_amount" class="form-control bg-light" readonly required placeholder="0.00">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Amount Term (Months) <span class="text-danger">*</span></label>
-                            <input type="number" name="loan_term" class="form-control" required value="360">
+                            <input type="number" name="loan_term" class="form-control" required value="{{ application.loan_term if application else '360' }}">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">Financing Type <span class="text-danger">*</span></label>
+                            <label class="form-label">Interest Rate (%) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" id="interest_rate" class="form-control" required value="4.30">
+                                <span class="input-group-text bg-light fw-bold">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Preferred Financing Type <span class="text-danger">*</span></label>
                             <select name="financing_type" class="form-select" required>
-                                <option value="Islamic">Islamic (Shariah)</option>
-                                <option value="Conventional">Conventional</option>
+                                <option value="Islamic" {% if application.financing_type == 'Islamic' %}selected{% endif %}>Islamic (Shariah)</option>
+                                <option value="Conventional" {% if application.financing_type == 'Conventional' %}selected{% endif %}>Conventional</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Property Value (RM) <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light fw-bold">RM</span>
-                                <input type="number" step="0.01" name="property_value" class="form-control" required placeholder="0.00">
+                                <input type="number" step="0.01" name="property_value" class="form-control" required placeholder="0.00" value="{{ application.property_value if application else '' }}">
                             </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Margin of Financing <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <input type="number" step="0.1" name="margin" class="form-control" value="90.0">
+                                <input type="number" step="0.1" name="margin" class="form-control" value="{{ application.margin if application else '90.0' }}">
                                 <span class="input-group-text bg-light fw-bold">%</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Property Type <span class="text-danger">*</span></label>
                             <select name="property_type" class="form-select" required>
-                                <option value="Terrace">Terrace House</option>
-                                <option value="Condominium">Condominium</option>
-                                <option value="Apartment">Apartment</option>
-                                <option value="Bungalow">Bungalow</option>
+                                <option value="Terrace" {% if application.property_type == 'Terrace' %}selected{% endif %}>Terrace House</option>
+                                <option value="Condominium" {% if application.property_type == 'Condominium' %}selected{% endif %}>Condominium</option>
+                                <option value="Apartment" {% if application.property_type == 'Apartment' %}selected{% endif %}>Apartment</option>
+                                <option value="Bungalow" {% if application.property_type == 'Bungalow' %}selected{% endif %}>Bungalow</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Property Location Context <span class="text-danger">*</span></label>
-                            <select name="property_area" class="form-select" required>
-                                <option value="Urban">City Center / Major Hub (Stricter NDI)</option>
-                                <option value="Semiurban">Town / Suburbs (Standard NDI)</option>
-                                <option value="Rural">Regional Area / Outskirts (Flexible NDI)</option>
+                            <label class="form-label text-navy fw-800">Monthly Installment (Estimate)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-success bg-opacity-10 fw-bold border-success border-opacity-25 text-success">RM</span>
+                                <input type="text" id="installment_display" class="form-control bg-success bg-opacity-10 border-success border-opacity-25 fw-bold text-success" readonly value="0.00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-navy fw-800">Location Quality / Tier <span class="text-danger">*</span></label>
+                            <select name="location_type" class="form-select border-primary-subtle" required>
+                                <option value="prime" {% if application.location_type == 'prime' %}selected{% endif %}>Prime Area (KL/Selangor/JB Major)</option>
+                                <option value="secondary" {% if application.location_type == 'secondary' %}selected{% endif %}>Secondary Market (Established Towns)</option>
+                                <option value="remote" {% if application.location_type == 'remote' %}selected{% endif %}>Developing / Remote Area (High Risk)</option>
                             </select>
                         </div>
 
                         <div class="col-md-6">
                             <label class="form-label">Purpose of Financing <span class="text-danger">*</span></label>
                             <select name="purpose" class="form-select" required>
-                                <option value="Own Stay">Own Stay</option>
-                                <option value="Investment">Investment</option>
-                                <option value="Refinancing">Refinancing</option>
+                                <option value="Own Stay" {% if application.purpose == 'Own Stay' %}selected{% endif %}>Own Stay</option>
+                                <option value="Investment" {% if application.purpose == 'Investment' %}selected{% endif %}>Investment</option>
+                                <option value="Refinancing" {% if application.purpose == 'Refinancing' %}selected{% endif %}>Refinancing</option>
                             </select>
                         </div>
                     </div>
@@ -286,6 +297,136 @@
         const btn = document.getElementById('btnSubmit');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing AI Analysis...';
+    });
+
+    // --- Auto-Calculation Logic ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = {
+            income: document.querySelector('input[name="income"]'),
+            co_income: document.querySelector('input[name="coapplicant_income"]'),
+            commitments: document.querySelector('input[name="monthly_commitments"]'),
+            prop_value: document.querySelector('input[name="property_value"]'),
+            mof: document.querySelector('input[name="margin"]'),
+            term: document.querySelector('input[name="loan_term"]'),
+            rate: document.getElementById('interest_rate'),
+            loan_amt_display: document.getElementById('loan_amount'),
+            dsr_display: document.getElementById('dsr_display'),
+            inst_display: document.getElementById('installment_display')
+        };
+
+        function calculateAll() {
+            if (!inputs.prop_value || !inputs.mof) return;
+
+            const pValue = parseFloat(inputs.prop_value.value) || 0;
+            const mofVal = parseFloat(inputs.mof.value) || 0;
+            
+            // 1. Calculate Financing Amount (Auto-detect)
+            const financingAmt = pValue * (mofVal / 100);
+            if (inputs.loan_amt_display) {
+                inputs.loan_amt_display.value = financingAmt.toFixed(2);
+            }
+
+            // 2. Calculate Monthly Installment (Current Rate)
+            const P = financingAmt;
+            const r = (parseFloat(inputs.rate ? inputs.rate.value : 4.3) || 4.3) / 100 / 12;
+            const n = parseInt(inputs.term ? inputs.term.value : 360) || 360;
+
+            let installment = 0;
+            if (r > 0 && n > 0) {
+                installment = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            } else if (n > 0) {
+                installment = P / n;
+            }
+            
+            if (inputs.inst_display) {
+                inputs.inst_display.value = installment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            }
+
+            // 3. Calculate DSR (Real-time auto calculate)
+            const incomeVal = parseFloat(inputs.income ? inputs.income.value : 0) || 0;
+            const coIncomeVal = parseFloat(inputs.co_income ? inputs.co_income.value : 0) || 0;
+            const commitmentsVal = parseFloat(inputs.commitments ? inputs.commitments.value : 0) || 0;
+
+            const totalIncome = incomeVal + coIncomeVal;
+            const totalCommit = commitmentsVal + installment;
+
+            if (totalIncome > 0 && inputs.dsr_display) {
+                const dsr = (totalCommit / totalIncome) * 100;
+                inputs.dsr_display.value = dsr.toFixed(2);
+            }
+        }
+
+        // Listen to all relevant inputs
+        [inputs.income, inputs.co_income, inputs.commitments, inputs.prop_value, inputs.mof, inputs.term, inputs.rate].forEach(node => {
+            if(node) node.addEventListener('input', calculateAll);
+        });
+
+        // --- NRIC Auto-Detect (Age & Gender) ---
+        const nricInput = document.querySelector('input[name="nric"]');
+        const ageInput = document.querySelector('input[name="age"]');
+        const genderSelect = document.querySelector('select[name="gender"]');
+
+        if (nricInput) {
+            nricInput.addEventListener('input', function(e) {
+                // 1. Auto-format with dashes: XXXXXX-XX-XXXX
+                let value = this.value.replace(/[^0-9]/g, '');
+                if (value.length > 6 && value.length <= 8) {
+                    value = value.slice(0, 6) + '-' + value.slice(6);
+                } else if (value.length > 8) {
+                    value = value.slice(0, 6) + '-' + value.slice(6, 8) + '-' + value.slice(8, 12);
+                }
+                this.value = value;
+
+                // 2. Extract Data
+                const cleanNric = value.replace(/-/g, '');
+                if (cleanNric.length >= 6) {
+                    const yy = parseInt(cleanNric.substring(0, 2));
+                    const mm = parseInt(cleanNric.substring(2, 4));
+                    const dd = parseInt(cleanNric.substring(4, 6));
+                    
+                    if (mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+                        const currentYear = new Date().getFullYear();
+                        const currentYearTwo = currentYear % 100;
+                        
+                        // Assume if yy > currentYearTwo, it's 1900s, else 2000s
+                        const birthYear = (yy > currentYearTwo) ? (1900 + yy) : (2000 + yy);
+                        
+                        let age = currentYear - birthYear;
+                        const today = new Date();
+                        const birthDate = new Date(birthYear, mm - 1, dd);
+                        if (today < birthDate) age--;
+
+                        if (ageInput && age > 0) ageInput.value = age;
+                    }
+                }
+
+                // 3. Gender Detection (Last digit: Odd=Male, Even=Female)
+                if (cleanNric.length === 12 && genderSelect) {
+                    const lastDigit = parseInt(cleanNric.charAt(11));
+                    genderSelect.value = (lastDigit % 2 === 0) ? 'Female' : 'Male';
+                }
+            });
+        }
+
+        // --- Validation Button ---
+        const btnValidate = document.getElementById('btnValidate');
+        if (btnValidate) {
+            btnValidate.addEventListener('click', function() {
+                const form = document.getElementById('assessmentForm');
+                if (form.checkValidity()) {
+                    btnValidate.innerHTML = '<i class="bi bi-check-circle-fill"></i> Data Verified';
+                    btnValidate.classList.replace('btn-navy', 'btn-success');
+                    setTimeout(() => {
+                        btnValidate.innerHTML = '<i class="bi bi-shield-check"></i> Validate Data';
+                        btnValidate.classList.replace('btn-success', 'btn-navy');
+                    }, 2000);
+                } else {
+                    form.reportValidity();
+                }
+            });
+        }
+
+        calculateAll(); // Run once on load
     });
 </script>
 {% endblock %}

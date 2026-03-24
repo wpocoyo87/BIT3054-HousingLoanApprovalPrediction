@@ -10,7 +10,7 @@
             <div class="stat-icon bg-emerald-light text-emerald-green">
                 <i class="bi bi-file-earmark-spreadsheet-fill"></i>
             </div>
-            <div class="stat-value">614</div>
+            <div class="stat-value">{{ total_records or 0 }}</div>
             <div class="stat-label">Total Records</div>
         </div>
     </div>
@@ -19,7 +19,7 @@
             <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-exclamation-triangle-fill"></i>
             </div>
-            <div class="stat-value">12</div>
+            <div class="stat-value">{{ missing_values or 0 }}</div>
             <div class="stat-label">Missing Values</div>
         </div>
     </div>
@@ -99,48 +99,15 @@
                         </tr>
                     </thead>
                     <tbody class="text-muted">
+                        {% for row in preview_data %}
                         <tr>
-                            <td class="ps-4">Male</td>
-                            <td>RM 5,849</td>
-                            <td>RM 128</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">Y</span></td>
+                            <td class="ps-4">{{ row.Gender }}</td>
+                            <td>RM {{ "{:,.0f}".format(row.ApplicantIncome) }}</td>
+                            <td>RM {{ "{:,.0f}".format(row.LoanAmount) }}</td>
+                            <td>{{ row.Credit_History }}</td>
+                            <td><span class="text-{{ 'emerald-green' if row.Loan_Status == 'Y' else 'danger' }}">{{ row.Loan_Status }}</span></td>
                         </tr>
-                        <tr>
-                            <td class="ps-4">Male</td>
-                            <td>RM 4,583</td>
-                            <td>RM 128</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">N</span></td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4">Female</td>
-                            <td>RM 3,000</td>
-                            <td>RM 66</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">Y</span></td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4">Male</td>
-                            <td>RM 2,583</td>
-                            <td>RM 120</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">Y</span></td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4">Male</td>
-                            <td>RM 6,000</td>
-                            <td>RM 141</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">Y</span></td>
-                        </tr>
-                        <tr>
-                            <td class="ps-4">Male</td>
-                            <td>RM 2,333</td>
-                            <td>RM 95</td>
-                            <td>1.0</td>
-                            <td><span class="text-emerald-green">N</span></td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>

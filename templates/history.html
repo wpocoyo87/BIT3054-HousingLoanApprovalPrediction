@@ -9,11 +9,11 @@
         <div class="row g-3 align-items-end">
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Date Range</label>
-                <input type="date" class="form-control">
+                <input type="date" id="filterDate" class="form-control">
             </div>
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Approval Status</label>
-                <select class="form-select">
+                <select id="filterStatus" class="form-select">
                     <option value="">All Decisions</option>
                     <option value="Approved">Approved</option>
                     <option value="Rejected">Rejected</option>
@@ -21,15 +21,15 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-muted">Financing Type</label>
-                <select class="form-select">
+                <select id="filterType" class="form-select">
                     <option value="">All Types</option>
                     <option value="Islamic">Islamic</option>
                     <option value="Conventional">Conventional</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex gap-2">
-                <button class="btn btn-navy flex-grow-1"><i class="bi bi-search me-2"></i> Search</button>
-                <button class="btn btn-light border"><i class="bi bi-arrow-clockwise"></i></button>
+                <button id="btnSearch" class="btn btn-navy flex-grow-1"><i class="bi bi-search me-2"></i> Search</button>
+                <button id="btnReset" class="btn btn-light border"><i class="bi bi-arrow-clockwise"></i></button>
             </div>
         </div>
     </div>
@@ -37,7 +37,7 @@
 
 <div class="card border-0 shadow-sm">
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle mb-0" id="historyTable">
             <thead class="bg-light">
                 <tr>
                     <th class="ps-4 py-3 small text-uppercase text-muted fw-800">Application ID</th>
@@ -50,7 +50,10 @@
             </thead>
             <tbody>
                 {% for app in applications %}
-                <tr>
+                <tr class="history-row" 
+                    data-date="{{ app.created_at.strftime('%Y-%m-%d') }}" 
+                    data-status="{{ app.prediction }}" 
+                    data-type="{{ app.financing_type }}">
                     <td class="ps-4">
                         <div class="fw-bold text-navy">#{{ (app.id | string)[-6:] | upper }}</div>
                     </td>
@@ -79,7 +82,11 @@
                                 <li><a class="dropdown-item py-2" href="{{ url_for('main.result', id=app.id) }}"><i class="bi bi-eye me-2"></i> View Result</a></li>
                                 <li><a class="dropdown-item py-2" href="#"><i class="bi bi-printer me-2"></i> Print</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i> Remove</a></li>
+                                <li>
+                                    <form action="{{ url_for('main.delete_assessment', id=app.id) }}" method="POST" onsubmit="return confirm('Delete this record? This cannot be undone.');">
+                                        <button type="submit" class="dropdown-item py-2 text-danger"><i class="bi bi-trash me-2"></i> Remove Record</button>
+                                    </form>
+                                </li>
                             </ul>
                         </div>
                     </td>
@@ -89,15 +96,68 @@
         </table>
     </div>
     <div class="card-footer bg-white border-0 py-4">
-        <nav aria-label="Page navigation">
-            <ul class="pagination justify-content-center mb-0">
-                <li class="page-item disabled"><a class="page-link border-0" href="#"><i class="bi bi-chevron-left"></i></a></li>
-                <li class="page-item active"><a class="page-link border-0" href="#">1</a></li>
-                <li class="page-item"><a class="page-link border-0" href="#">2</a></li>
-                <li class="page-item"><a class="page-link border-0" href="#">3</a></li>
-                <li class="page-item"><a class="page-link border-0" href="#"><i class="bi bi-chevron-right"></i></a></li>
-            </ul>
-        </nav>
+        {% if applications|length > 0 %}
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="small text-muted">
+                Showing total of <strong>{{ applications|length }}</strong> assessment records
+            </div>
+            {% if applications|length > 20 %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item disabled"><a class="page-link border-0" href="#"><i class="bi bi-chevron-left"></i></a></li>
+                    <li class="page-item active"><a class="page-link border-0" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link border-0" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="bi bi-info-circle me-2"></i> No records found matching the current database filters.
+        </div>
+        {% endif %}
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnSearch = document.getElementById('btnSearch');
+    const btnReset = document.getElementById('btnReset');
+    const filterDate = document.getElementById('filterDate');
+    const filterStatus = document.getElementById('filterStatus');
+    const filterType = document.getElementById('filterType');
+    const rows = document.querySelectorAll('.history-row');
+
+    function applyFilters() {
+        const dateVal = filterDate.value;
+        const statusVal = filterStatus.value;
+        const typeVal = filterType.value;
+
+        rows.forEach(row => {
+            const rowDate = row.getAttribute('data-date');
+            const rowStatus = row.getAttribute('data-status');
+            const rowType = row.getAttribute('data-type');
+
+            let show = true;
+
+            if (dateVal && rowDate !== dateVal) show = false;
+            if (statusVal && rowStatus !== statusVal) show = false;
+            if (typeVal && rowType !== typeVal) show = false;
+
+            row.style.display = show ? '' : 'none';
+        });
+    }
+
+    btnSearch.addEventListener('click', applyFilters);
+
+    btnReset.addEventListener('click', function() {
+        filterDate.value = '';
+        filterStatus.value = '';
+        filterType.value = '';
+        rows.forEach(row => row.style.display = '');
+    });
+});
+</script>
 {% endblock %}
