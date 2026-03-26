@@ -10,3 +10,4 @@ joblib
 gunicorn
 python-dotenv
 mongomock
+xgboost

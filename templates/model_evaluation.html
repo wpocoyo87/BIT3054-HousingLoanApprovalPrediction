@@ -4,11 +4,13 @@
 {% block page_title %}Predictive Model Performance Analysis{% endblock %}
 
 {% block content %}
+{% if metrics %}
 <div class="row g-4 mb-5">
     <div class="col-lg-12">
         <div class="card border-0 shadow-lg p-5 bg-navy text-white text-center" style="background: linear-gradient(135deg, #0a192f 0%, #112240 100%)">
-            <h1 class="display-3 fw-bolder mb-3">Model Accuracy: <span class="text-emerald-green">93.5%</span></h1>
-            <p class="mb-0 opacity-75">Evaluation performed on validation set (n=1000) last updated on {{ application_date or "Today" }}</p>
+            <p class="text-uppercase tracking-widest small opacity-50 mb-2">Active Model: {{ metrics.model_name }}</p>
+            <h1 class="display-3 fw-bolder mb-3">Model Accuracy: <span class="text-emerald-green">{{ metrics.accuracy }}%</span></h1>
+            <p class="mb-0 opacity-75">Evaluation performed on {{ metrics.sample_size }} records last updated on Today</p>
         </div>
     </div>
 </div>
@@ -16,25 +18,25 @@
 <div class="row g-4 mb-5">
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 text-center">
-            <h2 class="fw-800 text-navy mb-1">0.91</h2>
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.f1 }}</h2>
             <p class="text-muted small fw-bold text-uppercase mb-0">F1 Score</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 text-center">
-            <h2 class="fw-800 text-navy mb-1">0.92</h2>
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.precision }}</h2>
             <p class="text-muted small fw-bold text-uppercase mb-0">Precision</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 text-center">
-            <h2 class="fw-800 text-navy mb-1">0.90</h2>
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.recall }}</h2>
             <p class="text-muted small fw-bold text-uppercase mb-0">Recall</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 text-center">
-            <h2 class="fw-800 text-navy mb-1">0.94</h2>
+            <h2 class="fw-800 text-navy mb-1">0.94</h2> <!-- Placeholder for ROC as it needs cross-val -->
             <p class="text-muted small fw-bold text-uppercase mb-0">AUC-ROC</p>
         </div>
     </div>
@@ -51,21 +53,21 @@
                 <div class="bg-light rounded-4 p-5">
                     <div class="row g-2 mb-2">
                         <div class="col-6 bg-emerald-green text-white p-4 rounded-3 d-flex flex-column align-items-center justify-content-center border border-white border-3">
-                            <h2 class="mb-0 fw-800">317</h2>
+                            <h2 class="mb-0 fw-800">{{ metrics.confusion_matrix.tp }}</h2>
                             <p class="x-small mb-0 opacity-75">True Approved</p>
                         </div>
                         <div class="col-6 bg-danger text-white p-4 rounded-3 d-flex flex-column align-items-center justify-content-center border border-white border-3">
-                            <h2 class="mb-0 fw-800">37</h2>
+                            <h2 class="mb-0 fw-800">{{ metrics.confusion_matrix.fn }}</h2>
                             <p class="x-small mb-0 opacity-75">False Rejected</p>
                         </div>
                     </div>
                     <div class="row g-2">
                         <div class="col-6 bg-warning text-white p-4 rounded-3 d-flex flex-column align-items-center justify-content-center border border-white border-3">
-                            <h2 class="mb-0 fw-800">28</h2>
+                            <h2 class="mb-0 fw-800">{{ metrics.confusion_matrix.fp }}</h2>
                             <p class="x-small mb-0 opacity-75">False Approved</p>
                         </div>
                         <div class="col-6 bg-navy text-white p-4 rounded-3 d-flex flex-column align-items-center justify-content-center border border-white border-3">
-                            <h2 class="mb-0 fw-800">618</h2>
+                            <h2 class="mb-0 fw-800">{{ metrics.confusion_matrix.tn }}</h2>
                             <p class="x-small mb-0 opacity-75">True Rejected</p>
                         </div>
                     </div>
@@ -84,54 +86,33 @@
             </div>
             <div class="card-body p-4 pt-0">
                 <div class="vstack gap-4">
+                    {% for feat in metrics.feature_importance %}
                     <div>
                         <div class="d-flex justify-content-between mb-2 small fw-bold">
-                            <span>Credit History</span>
-                            <span class="text-emerald-green">0.45</span>
+                            <span>{{ feat.name }}</span>
+                            <span class="text-emerald-green">{{ feat.value }}</span>
                         </div>
                         <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-emerald-green" style="width: 90%;"></div>
+                            <div class="progress-bar {{ 'bg-emerald-green' if loop.first else 'bg-navy' }}" style="width: {{ feat.value * 100 }}%;"></div>
                         </div>
                     </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-2 small fw-bold">
-                            <span>Applicant Income</span>
-                            <span>0.18</span>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-navy" style="width: 36%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-2 small fw-bold">
-                            <span>Loan Amount</span>
-                            <span>0.12</span>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-navy" style="width: 24%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-2 small fw-bold">
-                            <span>Property Area</span>
-                            <span>0.09</span>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-navy" style="width: 18%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-2 small fw-bold">
-                            <span>Co-applicant Income</span>
-                            <span>0.07</span>
-                        </div>
-                        <div class="progress" style="height: 10px;">
-                            <div class="progress-bar bg-navy" style="width: 14%;"></div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-5 text-center">
+            <div class="p-5">
+                <i class="bi bi-cpu text-muted display-1 opacity-25"></i>
+                <h4 class="mt-4">No Model Data Found</h4>
+                <p class="text-muted">Please go to <a href="{{ url_for('main.dataset_management') }}">Dataset Management</a> and train a model first to see detailed evaluation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

@@ -1,74 +1,58 @@
 import pandas as pd
 import numpy as np
 
-def preprocess_input(df):
-    """
-    Preprocess user input from the web form matching training data.
-    """
-    df = df.copy()
-    
-    education_mapping = {'Graduate': 1, 'Not Graduate': 0}
-    married_mapping = {'Yes': 1, 'No': 0}
-    lppsa_mapping = {'Yes': 1, 'No': 0}
-    
-    df['Education'] = df['Education'].map(education_mapping).fillna(1)
-    df['Married'] = df['Married'].map(married_mapping).fillna(0)
-    df['LPPSA_Eligible_Binary'] = df['LPPSA_Eligible'].map(lppsa_mapping).fillna(0)
-    df['Dependents'] = df['Dependents'].replace('3+', '3').astype(int)
-    
-    # Handle Property Area dummies
-    df['Property_Area_Rural'] = (df['Property_Area'] == 'Rural').astype(int)
-    df['Property_Area_Semiurban'] = (df['Property_Area'] == 'Semiurban').astype(int)
-    df['Property_Area_Urban'] = (df['Property_Area'] == 'Urban').astype(int)
-    
-    cols = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 
-            'Credit_Score', 'Education', 'Married', 'Dependents', 'DSR', 'NDI', 'LPPSA_Eligible_Binary',
-            'Property_Area_Rural', 'Property_Area_Semiurban', 'Property_Area_Urban']
-            
-    for col in cols:
-        if col not in df.columns:
-            df[col] = 0
-            
-    return df[cols]
-
 def preprocess_training_data(df):
     """
-    Preprocess the raw training dataset.
+    Cleans and prepares the dataset for the ML models.
+    Matches the logic used in professional banking assessments (Stress Test vs Actual).
     """
-    df = df.copy()
+    # 1. Feature Engineering (Professional Banking Logic)
     
-    # Fix LPPSA Mapping
-    df['LPPSA_Eligible_Binary'] = df['LPPSA_Eligible'].map({'Yes': 1, 'No': 0}).fillna(0)
+    # Use 6.5% Stress Test Rate for DSR (standard risk assessment)
+    stress_ir = 6.5 / 100 / 12
+    # Use Interest_Rate from data if available, else fallback to 4.5%
+    actual_ir_val = df['Interest_Rate'] if 'Interest_Rate' in df.columns else 4.5
+    actual_ir = (actual_ir_val / 100) / 12
     
-    # Map target
-    if 'Loan_Status' in df.columns:
-        df['Loan_Status'] = df['Loan_Status'].map({'Y': 1, 'N': 0})
+    n = df['Loan_Amount_Term']
+    p = df['LoanAmount']
     
-    df['Education'] = df['Education'].map({'Graduate': 1, 'Not Graduate': 0}).fillna(1)
-    df['Married'] = df['Married'].map({'Yes': 1, 'No': 0}).fillna(0)
-    df['Dependents'] = df['Dependents'].replace('3+', '3').astype(int)
+    # Calculate Two Types of Installments
+    # A. Stress Installment (for DSR)
+    stress_inst = (p * stress_ir * (1 + stress_ir)**n) / ((1 + stress_ir)**n - 1)
     
-    # One-hot encoding for Property_Area
-    if 'Property_Area' in df.columns:
-        for area in ['Rural', 'Semiurban', 'Urban']:
-            df[f'Property_Area_{area}'] = (df['Property_Area'] == area).astype(int)
-            
-    if 'Loan_Status' in df.columns:
-        X = df.drop(columns=['Loan_Status'])
-        y = df['Loan_Status']
-    else:
-        X = df
-        y = None
-        
-    cols = ['ApplicantIncome', 'CoapplicantIncome', 'LoanAmount', 'Loan_Amount_Term', 
-            'Credit_Score', 'Education', 'Married', 'Dependents', 'DSR', 'NDI', 'LPPSA_Eligible_Binary',
-            'Property_Area_Rural', 'Property_Area_Semiurban', 'Property_Area_Urban']
+    # B. Actual Installment (for NDI)
+    actual_inst = (p * actual_ir * (1 + actual_ir)**n) / ((1 + actual_ir)**n - 1)
+    
+    # Update Dataframe with more realistic numbers
+    # Total Income for better accuracy
+    co_inc = df['CoapplicantIncome'].fillna(0) if 'CoapplicantIncome' in df.columns else 0
+    total_income = df['ApplicantIncome'] + co_inc
+    
+    df['Monthly_Installment'] = actual_inst 
+    df['NDI'] = total_income - actual_inst
+    df['DSR'] = (stress_inst / total_income) * 100
 
-            
-    for col in cols:
-        if col not in X.columns:
-            X[col] = 0
-            
-    X = X[cols]
+    # 2. Select Features (Matching your X list)
+    features = ['ApplicantIncome', 'Credit_Score', 'DSR', 'NDI', 'Monthly_Installment']
+    X = df[features].copy()
+    
+    # 3. Handle Target Label
+    if 'Loan_Status' in df.columns:
+        y = df['Loan_Status'].map({'Y': 1, 'N': 0, 1: 1, 0: 0}).fillna(0).astype(int)
+    else:
+        # Fallback to rules if Loan_Status is missing (e.g. for prediction)
+        y = ((df['DSR'] < 70) & (df['NDI'] > 1500) & (df['Credit_Score'] > 600)).astype(int)
+
+    # 4. Final Cleanup
+    X = X.fillna(0)
+
     return X, y
 
+def preprocess_input(df):
+    """
+    Preprocesses a single application (or batch) for prediction.
+    Only returns the features (X).
+    """
+    X, _ = preprocess_training_data(df)
+    return X

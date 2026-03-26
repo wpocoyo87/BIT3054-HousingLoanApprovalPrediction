@@ -51,6 +51,7 @@ class LoanApplication(me.Document):
     margin = me.FloatField()
     property_type = me.StringField(max_length=50)
     property_area = me.StringField(max_length=50)
+    interest_rate = me.FloatField(default=4.5)
     purpose = me.StringField(max_length=50)
     
     # Prediction

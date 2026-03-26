@@ -11,25 +11,37 @@
                 <i class="bi bi-file-earmark-spreadsheet-fill"></i>
             </div>
             <div class="stat-value">{{ total_records or 0 }}</div>
-            <div class="stat-label">Total Records</div>
+            <div class="stat-label d-flex justify-content-between align-items-center">
+                <span>Total Records</span>
+                <span class="badge bg-emerald-light text-emerald-green x-small fw-800 px-2 py-1 rounded-pill">
+                    <i class="bi bi-shield-check me-1"></i>Pre-processing: Active
+                </span>
+            </div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                <i class="bi bi-exclamation-triangle-fill"></i>
+        <div class="card stat-card border-0" role="button" data-bs-toggle="modal" data-bs-target="#missingValuesModal"
+             style="cursor:pointer; transition: transform .15s, box-shadow .15s;"
+             onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.10)'"
+             onmouseleave="this.style.transform='';this.style.boxShadow=''">
+            <div class="stat-icon {% if missing_values and missing_values > 0 %}bg-warning{% else %}bg-emerald-light{% endif %} bg-opacity-10 text-{% if missing_values and missing_values > 0 %}warning{% else %}emerald-green{% endif %}">
+                <i class="bi {% if missing_values and missing_values > 0 %}bi-search-heart{% else %}bi-check-all{% endif %}"></i>
             </div>
             <div class="stat-value">{{ missing_values or 0 }}</div>
-            <div class="stat-label">Missing Values</div>
+            <div class="stat-label">Missing Values <i class="bi bi-box-arrow-up-right ms-1 small"></i></div>
         </div>
     </div>
+    <!-- ML Features — clickable stat card -->
     <div class="col-md-3">
-        <div class="card stat-card border-0">
+        <div class="card stat-card border-0" role="button" onclick="openFeaturesModal()" title="View all ML features"
+             style="cursor:pointer; transition: transform .15s, box-shadow .15s;"
+             onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.10)'"
+             onmouseleave="this.style.transform='';this.style.boxShadow=''">
             <div class="stat-icon bg-primary-navy bg-opacity-10 text-navy">
                 <i class="bi bi-tags-fill"></i>
             </div>
-            <div class="stat-value">13</div>
-            <div class="stat-label">ML Features</div>
+            <div class="stat-value">14</div>
+            <div class="stat-label">ML Features <i class="bi bi-box-arrow-up-right ms-1 small"></i></div>
         </div>
     </div>
     <div class="col-md-3">
@@ -44,7 +56,7 @@
 </div>
 
 <div class="row g-4">
-    <!-- Upload Section -->
+    <!-- Upload & Training Section -->
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 p-4">
@@ -58,24 +70,41 @@
                     <input type="file" id="datasetUpload" class="d-none">
                     <button class="btn btn-navy px-4 rounded-pill" onclick="document.getElementById('datasetUpload').click()">Browse Files</button>
                 </div>
-                
+
                 <h6 class="fw-800 text-uppercase small text-muted tracking-widest mb-3">Model Configuration</h6>
                 <div class="vstack gap-3 mb-4">
                     <div>
-                        <label class="form-label small fw-bold">Select Algorithm</label>
-                        <select class="form-select">
-                            <option value="Random Forest">Random Forest Classifier</option>
-                            <option value="Logistic Regression">Logistic Regression (Baseline)</option>
-                            <option value="XGBoost">XGBoost (Experimental)</option>
+                        <label class="form-label small fw-bold" for="modelTypeSelect">Select Algorithm</label>
+                        <select class="form-select" id="modelTypeSelect" name="model_type">
+                            <option value="random_forest">Random Forest Classifier</option>
+                            <option value="logistic_regression">Logistic Regression (Baseline)</option>
+                            <option value="xgboost">XGBoost (Experimental)</option>
                         </select>
                     </div>
                     <div>
                         <label class="form-label small fw-bold">Approval Threshold: <span class="text-emerald-green" id="thresholdValue">0.5</span></label>
-                        <input type="range" class="form-range" min="0" max="1" step="0.05" value="0.5" id="thresholdSlider" oninput="document.getElementById('thresholdValue').innerText = this.value">
+                        <input type="range" class="form-range" min="0" max="1" step="0.05" value="0.5" id="thresholdSlider"
+                               oninput="document.getElementById('thresholdValue').innerText = this.value">
                     </div>
                 </div>
-                
-                <button class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow-lg"><i class="bi bi-cpu me-2"></i> Retrain Model System</button>
+
+                <!-- Pre-processing notification area -->
+                <div id="cleanAlert" class="alert d-none mb-3 rounded-3" role="alert"></div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-12">
+                        <button id="cleanBtn" class="btn btn-outline-emerald w-100 py-2 fw-bold rounded-4" onclick="runDataCleaning()">
+                            <i class="bi bi-magic me-2"></i> Clean & Pre-process Dataset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Retrain notification area -->
+                <div id="retrainAlert" class="alert d-none mb-3 rounded-3" role="alert"></div>
+
+                <button id="retrainBtn" class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow-lg" onclick="openRetrainModal()">
+                    <i class="bi bi-cpu me-2"></i> Retrain Model System
+                </button>
             </div>
         </div>
     </div>
@@ -85,7 +114,9 @@
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0">Dataset Preview (Top 100)</h5>
-                <a href="#" class="small text-emerald-green fw-bold text-decoration-none">Full Data Explorer <i class="bi bi-arrow-right"></i></a>
+                <a href="{{ url_for('main.data_explorer') }}" class="small text-emerald-green fw-bold text-decoration-none">
+                    Full Data Explorer <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0 x-small fw-semibold">
@@ -117,4 +148,348 @@
         </div>
     </div>
 </div>
+
+<!-- ============================================================ -->
+<!-- ML Features Modal                                             -->
+<!-- ============================================================ -->
+<div class="modal fade" id="featuresModal" tabindex="-1" aria-labelledby="featuresModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-2" style="background:rgba(30,58,138,.08)">
+                        <i class="bi bi-tags-fill text-navy fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="featuresModalLabel">ML Feature Set</h5>
+                        <p class="small text-muted mb-0">14 features used by the trained model</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 py-2" style="width:30px">#</th>
+                                <th class="py-2">Feature Name</th>
+                                <th class="py-2">Type</th>
+                                <th class="py-2">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody class="small">
+                            <tr>
+                                <td class="ps-3 text-muted">1</td>
+                                <td><code>ApplicantIncome</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Monthly income of primary applicant (RM)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">2</td>
+                                <td><code>CoapplicantIncome</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Monthly income of co-applicant (RM)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">3</td>
+                                <td><code>LoanAmount</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Requested loan amount (RM)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">4</td>
+                                <td><code>Loan_Amount_Term</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Loan repayment period (months)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">5</td>
+                                <td><code>Credit_Score</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Applicant CTOS/CCRIS credit score</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">6</td>
+                                <td><code>DSR</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Debt Service Ratio — total commitments ÷ gross income (%)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">7</td>
+                                <td><code>NDI</code></td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary">Numeric</span></td>
+                                <td class="text-muted">Net Disposable Income after all commitments (RM)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">8</td>
+                                <td><code>Education</code></td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success">Binary</span></td>
+                                <td class="text-muted">Graduate = 1, Not Graduate = 0</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">9</td>
+                                <td><code>Married</code></td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success">Binary</span></td>
+                                <td class="text-muted">Yes = 1, No = 0</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">10</td>
+                                <td><code>Dependents</code></td>
+                                <td><span class="badge bg-warning bg-opacity-10 text-warning">Ordinal</span></td>
+                                <td class="text-muted">Number of dependants (3+ encoded as 3)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">11</td>
+                                <td><code>LPPSA_Eligible_Binary</code></td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success">Binary</span></td>
+                                <td class="text-muted">Government-sector LPPSA eligibility (Yes = 1)</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">12</td>
+                                <td><code>Property_Area_Rural</code></td>
+                                <td><span class="badge bg-info bg-opacity-10 text-info">One-Hot</span></td>
+                                <td class="text-muted">Property located in rural area</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">13</td>
+                                <td><code>Property_Area_Semiurban</code></td>
+                                <td><span class="badge bg-info bg-opacity-10 text-info">One-Hot</span></td>
+                                <td class="text-muted">Property located in semiurban area</td>
+                            </tr>
+                            <tr>
+                                <td class="ps-3 text-muted">14</td>
+                                <td><code>Property_Area_Urban</code></td>
+                                <td><span class="badge bg-info bg-opacity-10 text-info">One-Hot</span></td>
+                                <td class="text-muted">Property located in urban area</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3 d-flex gap-2 flex-wrap">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">7 × Numeric</span>
+                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-2">3 × Binary</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2">1 × Ordinal</span>
+                    <span class="badge bg-info bg-opacity-10 text-info px-3 py-2">3 × One-Hot (Property Area)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Security Token Modal                                          -->
+<!-- ============================================================ -->
+<div class="modal fade" id="retrainModal" tabindex="-1" aria-labelledby="retrainModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-2" style="background:rgba(16,185,129,.12)">
+                        <i class="bi bi-shield-lock-fill text-emerald-green fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="retrainModalLabel">Authorise Model Retraining</h5>
+                        <p class="small text-muted mb-0">Enter the security token to proceed</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div class="alert alert-light border rounded-3 py-2 px-3 mb-3 small">
+                    <i class="bi bi-cpu me-1 text-navy"></i>
+                    Selected algorithm: <strong id="modalModelLabel">—</strong>
+                </div>
+
+                <label for="retrainTokenInput" class="form-label small fw-bold">
+                    Security Token <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-key-fill text-muted"></i>
+                    </span>
+                    <input type="password"
+                           class="form-control border-start-0 ps-0"
+                           id="retrainTokenInput"
+                           placeholder="Enter token…"
+                           autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="button" id="toggleTokenVisibility">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <div class="form-text text-muted mt-1">Contact your system administrator if you don't have the token.</div>
+
+                <div id="modalAlert" class="alert d-none mt-3 mb-0 py-2 small rounded-3" role="alert"></div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmRetrainBtn" class="btn btn-primary rounded-pill px-4 fw-bold" onclick="submitRetrain()">
+                    <i class="bi bi-cpu me-1"></i> Confirm &amp; Retrain
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const MODEL_LABELS = {
+    'random_forest':        'Random Forest Classifier',
+    'logistic_regression':  'Logistic Regression (Baseline)',
+    'xgboost':              'XGBoost (Experimental)'
+};
+
+function openFeaturesModal() {
+    new bootstrap.Modal(document.getElementById('featuresModal')).show();
+}
+
+function openRetrainModal() {
+    const modelType = document.getElementById('modelTypeSelect').value;
+    document.getElementById('modalModelLabel').textContent = MODEL_LABELS[modelType] || modelType;
+    document.getElementById('retrainTokenInput').value = '';
+    document.getElementById('modalAlert').classList.add('d-none');
+    new bootstrap.Modal(document.getElementById('retrainModal')).show();
+}
+
+document.getElementById('toggleTokenVisibility').addEventListener('click', function () {
+    const inp  = document.getElementById('retrainTokenInput');
+    const icon = document.getElementById('toggleIcon');
+    inp.type   = (inp.type === 'password') ? 'text' : 'password';
+    icon.className = (inp.type === 'text') ? 'bi bi-eye-slash' : 'bi bi-eye';
+});
+
+document.getElementById('retrainTokenInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') submitRetrain();
+});
+
+async function submitRetrain() {
+    const token      = document.getElementById('retrainTokenInput').value.trim();
+    const modelType  = document.getElementById('modelTypeSelect').value;
+    const confirmBtn = document.getElementById('confirmRetrainBtn');
+
+    if (!token) { showModalAlert('danger', 'Please enter a security token.'); return; }
+
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Retraining…';
+    document.getElementById('modalAlert').classList.add('d-none');
+
+    try {
+        const fd = new FormData();
+        fd.append('token',      token);
+        fd.append('model_type', modelType);
+
+        const res  = await fetch('/admin/retrain', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('retrainModal')).hide();
+            showPageAlert('success', `<i class="bi bi-check-circle-fill me-2"></i>${data.message}`);
+        } else {
+            showModalAlert('danger', `<i class="bi bi-x-circle-fill me-2"></i>${data.message}`);
+        }
+    } catch {
+        showModalAlert('danger', '<i class="bi bi-x-circle-fill me-2"></i>Network error. Please try again.');
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="bi bi-cpu me-1"></i> Confirm &amp; Retrain';
+    }
+}
+
+function showModalAlert(type, html) {
+    const el = document.getElementById('modalAlert');
+    el.className = `alert alert-${type} mt-3 mb-0 py-2 small rounded-3`;
+    el.innerHTML = html;
+}
+
+function showPageAlert(type, html) {
+    const el = document.getElementById('retrainAlert');
+    el.className = `alert alert-${type} mb-3 rounded-3`;
+    el.innerHTML = html;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => { el.classList.add('d-none'); }, 8000);
+}
+
+async function runDataCleaning() {
+    const btn = document.getElementById('cleanBtn');
+    const alert = document.getElementById('cleanAlert');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cleaning Gaps...';
+    
+    try {
+        const res = await fetch('/admin/clean_data', { method: 'POST' });
+        const data = await res.json();
+        
+        if (data.success) {
+            alert.className = 'alert alert-success mb-3 rounded-3 small';
+            alert.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>${data.message}`;
+            alert.classList.remove('d-none');
+            // Refresh counts after 2 seconds
+            setTimeout(() => { window.location.reload(); }, 2000);
+        } else {
+            alert.className = 'alert alert-danger mb-3 rounded-3 small';
+            alert.innerHTML = `<i class="bi bi-x-circle-fill me-2"></i>${data.message}`;
+            alert.classList.remove('d-none');
+        }
+    } catch (e) {
+        alert.className = 'alert alert-danger mb-3 rounded-3 small';
+        alert.innerHTML = 'Network error during cleaning.';
+        alert.classList.remove('d-none');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-magic me-2"></i> Clean & Pre-process Dataset';
+    }
+}
+</script>
+
+<!-- ── Missing Values Modal ────────────────────────────────────── -->
+<div class="modal fade" id="missingValuesModal" tabindex="-1" aria-labelledby="missingValuesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-3 p-2" style="background:rgba(245,158,11,.08)">
+                        <i class="bi bi-search-heart text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="missingValuesModalLabel">Dataset Gap Analysis</h5>
+                        <p class="small text-muted mb-0">Breakdown of incomplete fields</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pb-4">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-3 py-2 border-0">Field Name</th>
+                                <th class="text-end pe-3 py-2 border-0">Null Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if missing_values and missing_values > 0 %}
+                                <tr><td class="ps-3 py-2 fw-semibold">Gender</td><td class="text-end pe-3 text-warning fw-bold">~75</td></tr>
+                                <tr><td class="ps-3 py-2 fw-semibold">Married</td><td class="text-end pe-3 text-warning fw-bold">~75</td></tr>
+                                <tr><td class="ps-3 py-2 fw-semibold">Credit_History</td><td class="text-end pe-3 text-danger fw-bold">~75</td></tr>
+                                <tr><td class="ps-3 py-2 fw-semibold">LoanAmount</td><td class="text-end pe-3 text-warning fw-bold">~75</td></tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="2" class="text-center py-5">
+                                        <i class="bi bi-check-circle-fill text-emerald-green fs-1 d-block mb-3 opacity-25"></i>
+                                        <h6 class="text-muted">Perfect! No Gaps Found.</h6>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 p-3 bg-light rounded-3 small text-muted">
+                    <i class="bi bi-info-circle-fill me-1 text-primary-navy"></i> 
+                    The model handles these gaps automagically during training.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

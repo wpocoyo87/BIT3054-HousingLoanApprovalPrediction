@@ -1,47 +1,55 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
 import joblib
 import os
-from preprocessing import preprocess_training_data
+import sys
 
-def train_and_save():
-    base_dir = os.path.dirname(__file__)
-    data_path = os.path.join(base_dir, 'loan_data.csv')
-    
-    if os.path.exists(data_path):
-        df = pd.read_csv(data_path)
-    else:
-        print("Dataset not found. Generating dummy housing loan data for demonstration...")
-        np.random.seed(42)
-        n = 600
-        df = pd.DataFrame({
-            'Loan_ID': [f'LP00{i}' for i in range(n)],
-            'Gender': np.random.choice(['Male', 'Female'], n),
-            'Married': np.random.choice(['Yes', 'No'], n),
-            'Dependents': np.random.choice(['0', '1', '2', '3+'], n),
-            'Education': np.random.choice(['Graduate', 'Not Graduate'], n),
-            'Self_Employed': np.random.choice(['No', 'Yes'], n),
-            'ApplicantIncome': np.random.randint(2000, 20000, n),
-            'CoapplicantIncome': np.random.randint(0, 10000, n),
-            'LoanAmount': np.random.randint(50, 500, n),
-            'Loan_Amount_Term': np.random.choice([120, 240, 360, 480], n),
-            'Credit_History': np.random.choice([0.0, 1.0], n, p=[0.2, 0.8]),
-            'Property_Area': np.random.choice(['Urban', 'Rural', 'Semiurban'], n),
-            'Loan_Status': np.random.choice(['Y', 'N'], n, p=[0.7, 0.3])
-        })
-        df.to_csv(data_path, index=False)
+# Ensure the ML model directory is in the path for imports
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.append(BASE_DIR)
 
-    print("Preprocessing data...")
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+try:
+    from preprocessing import preprocess_training_data
+except ImportError:
+    # Fallback for different execution contexts
+    sys.path.append(os.getcwd())
+    from ml_model.preprocessing import preprocess_training_data
+
+def train_and_save(model_type='random_forest'):
+    data_path = os.path.join(BASE_DIR, 'loan_data.csv')
+    save_path = os.path.join(BASE_DIR, 'model.pkl')
+
+    if not os.path.exists(data_path):
+        print(f"FAILED: Data file not found at {data_path}")
+        sys.exit(1)
+
+    print(f"Loading data from {data_path}...")
+    df = pd.read_csv(data_path)
     X, y = preprocess_training_data(df)
-    
-    print("Training RandomForestClassifier...")
-    model = RandomForestClassifier(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    
-    save_path = os.path.join(base_dir, 'model.pkl')
+
+    # 80/20 Split for Realism
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model_type = model_type.lower().strip()
+    if model_type == 'logistic_regression':
+        model = LogisticRegression(max_iter=1000, random_state=42)
+    elif model_type == 'xgboost':
+        model = HistGradientBoostingClassifier(max_iter=100, random_state=42)
+    else:
+        model = RandomForestClassifier(n_estimators=100, max_depth=6, min_samples_leaf=15, random_state=42)
+
+    print(f"Training {model_type} on {len(X_train)} samples...")
+    model.fit(X_train, y_train)
+
     joblib.dump(model, save_path)
-    print(f"Model saved to {save_path}")
+    print(f"SUCCESS: Model saved to {save_path}")
+    return save_path
 
 if __name__ == '__main__':
-    train_and_save()
+    mt = sys.argv[1] if len(sys.argv) > 1 else 'random_forest'
+    train_and_save(model_type=mt)

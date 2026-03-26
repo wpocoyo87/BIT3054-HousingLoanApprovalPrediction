@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import login_required, current_user
 from app.models import LoanApplication, Prediction, User
 from werkzeug.security import generate_password_hash
@@ -6,8 +6,13 @@ from werkzeug.security import generate_password_hash
 import math
 import joblib
 import os
+import sys
+import subprocess
 import pandas as pd
 from ml_model.preprocessing import preprocess_input
+from ml_model.evaluate_model import get_model_evaluation_metrics
+
+RETRAIN_TOKEN = 'puteraputeri7'
 
 main_bp = Blueprint('main', __name__)
 
@@ -90,6 +95,7 @@ def loan_form(id=None):
             'property_type': request.form.get('property_type'),
             'property_area': request.form.get('location_type'), # mapping
             'purpose': request.form.get('purpose'),
+            'interest_rate': float(request.form.get('interest_rate', 4.5)), # Capture interest rate
             'credit_score': float(request.form.get('credit_score_numeric', 650))
         }
         
@@ -118,7 +124,8 @@ def loan_form(id=None):
                 'Property_Area': data['property_area'],
                 'DSR': data['dsr'],
                 'NDI': data['ndi'],
-                'LPPSA_Eligible': data['lppsa_eligible']
+                'LPPSA_Eligible': data['lppsa_eligible'],
+                'Interest_Rate': application.interest_rate
             }])
 
             
@@ -197,13 +204,178 @@ def dataset_management():
                            missing_values=missing_values,
                            preview_data=preview_data)
 
+
+@main_bp.route('/admin/clean_data', methods=['POST'])
+@login_required
+def clean_data():
+    """Manual trigger to fill missing values (Imputation)."""
+    if current_user.role != 'admin':
+        return jsonify({'success': False, 'message': 'Access denied.'}), 403
+        
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'loan_data.csv')
+    try:
+        df = pd.read_csv(csv_path)
+        # Smatly fill missing values based on data type
+        for col in df.columns:
+            if df[col].isnull().any():
+                # Check if it's a numeric column (float/int)
+                if pd.api.types.is_numeric_dtype(df[col]):
+                    df[col] = df[col].fillna(df[col].mean())
+                else:
+                    # For string/categorical: use the most frequent value (Mode)
+                    mode_val = df[col].mode()
+                    if not mode_val.empty:
+                        df[col] = df[col].fillna(mode_val[0])
+                    else:
+                        df[col] = df[col].fillna("Unknown")
+        
+        df.to_csv(csv_path, index=False)
+        return jsonify({
+            'success': True, 
+            'message': 'Dataset cleaned! All missing values have been filled using smart Imputation.'
+        })
+    except Exception as e:
+        print(f"Cleaning error: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@main_bp.route('/admin/retrain', methods=['POST'])
+@login_required
+def retrain_model():
+    """Retrain the ML model. Requires admin role and a security token."""
+    if current_user.role != 'admin':
+        return jsonify({'success': False, 'message': 'Access denied.'}), 403
+
+    token = request.form.get('token', '').strip()
+    if token != RETRAIN_TOKEN:
+        return jsonify({'success': False, 'message': 'Invalid security token. Retraining denied.'}), 401
+
+    model_type = request.form.get('model_type', 'random_forest').strip()
+    valid_models = ['random_forest', 'logistic_regression', 'xgboost']
+    if model_type not in valid_models:
+        return jsonify({'success': False, 'message': f'Invalid model type: {model_type}'}), 400
+
+    try:
+        train_script = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'train_model.py')
+        result = subprocess.run(
+            [sys.executable, train_script, model_type],
+            capture_output=True, text=True, timeout=300
+        )
+        if result.returncode == 0:
+            model_labels = {
+                'random_forest': 'Random Forest Classifier',
+                'logistic_regression': 'Logistic Regression (Baseline)',
+                'xgboost': 'XGBoost (Experimental)'
+            }
+            return jsonify({
+                'success': True,
+                'message': f"Model retrained successfully using {model_labels[model_type]}!",
+                'log': result.stdout
+            })
+        else:
+            # 🚨 NEW: Show details for debugging
+            print(f"Subprocess failed (code {result.returncode}): {result.stderr}")
+            return jsonify({
+                'success': False,
+                'message': f"Training script failed: {result.stderr.strip() or 'Unknown Error'}",
+                'log': result.stderr
+            }), 500
+    except subprocess.TimeoutExpired:
+        return jsonify({'success': False, 'message': 'Training timed out (>5 min).'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@main_bp.route('/admin/data_explorer')
+@login_required
+def data_explorer():
+    """Full, paginated, searchable dataset explorer for admins."""
+    if current_user.role != 'admin':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'loan_data.csv')
+
+    search   = request.args.get('search', '').strip()
+    status   = request.args.get('status', '').strip()   # 'Y', 'N', or ''
+    page     = max(1, int(request.args.get('page', 1)))
+    per_page = 20
+
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as e:
+        flash(f'Could not read dataset: {e}', 'danger')
+        return redirect(url_for('main.dataset_management'))
+
+    # --- Summary stats (computed on full dataset before filtering) ---
+    total_records  = len(df)
+    approval_rate  = round((df['Loan_Status'] == 'Y').sum() / total_records * 100, 1) if total_records else 0
+    avg_income     = round(df['ApplicantIncome'].mean(), 0) if 'ApplicantIncome' in df.columns else 0
+    avg_loan       = round(df['LoanAmount'].mean(), 0)     if 'LoanAmount'       in df.columns else 0
+    missing_total  = int(df.isnull().sum().sum())
+
+    # --- Filtering ---
+    if search:
+        mask = df.apply(lambda row: row.astype(str).str.contains(search, case=False).any(), axis=1)
+        df   = df[mask]
+    if status in ('Y', 'N'):
+        df = df[df['Loan_Status'] == status]
+
+    filtered_total = len(df)
+    total_pages    = max(1, math.ceil(filtered_total / per_page))
+    page           = min(page, total_pages)
+    start          = (page - 1) * per_page
+    page_data      = df.iloc[start : start + per_page].fillna('—').to_dict('records')
+    columns        = list(df.columns)
+
+    return render_template('data_explorer.html',
+        page_data      = page_data,
+        columns        = columns,
+        current_page   = page,
+        total_pages    = total_pages,
+        filtered_total = filtered_total,
+        total_records  = total_records,
+        approval_rate  = approval_rate,
+        avg_income     = avg_income,
+        avg_loan       = avg_loan,
+        missing_total  = missing_total,
+        search         = search,
+        status_filter  = status,
+        per_page       = per_page,
+    )
+
+
+@main_bp.route('/admin/download_dataset')
+@login_required
+def download_dataset():
+    """Download the current training dataset as CSV."""
+    if current_user.role != 'admin':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.dashboard'))
+        
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'loan_data.csv')
+    if not os.path.exists(csv_path):
+        flash('Dataset file not found.', 'danger')
+        return redirect(url_for('main.data_explorer'))
+        
+    return send_file(csv_path, as_attachment=True, download_name='housing_loan_dataset_2026.csv')
+
+
 @main_bp.route('/admin/evaluation')
 @login_required
 def model_evaluation():
     if current_user.role != 'admin':
         flash('Access denied.', 'danger')
         return redirect(url_for('main.dashboard'))
-    return render_template('model_evaluation.html')
+        
+    metrics = get_model_evaluation_metrics()
+    
+    if metrics and metrics.get('success'):
+        return render_template('model_evaluation.html', metrics=metrics)
+    else:
+        # Fallback for empty/error state
+        flash('Evaluation metrics not found. Please train a model first.', 'warning')
+        return render_template('model_evaluation.html', metrics=None)
 
 @main_bp.route('/result/<id>')
 @login_required
