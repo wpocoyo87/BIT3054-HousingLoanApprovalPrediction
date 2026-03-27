@@ -1,0 +1,19 @@
+{
+    "success": true,
+    "model_name": "Logistic Regression",
+    "type": "logistic_regression",
+    "trained_at": "2026-03-27 23:18:24",
+    "accuracy": 65.9,
+    "precision": 0.6502,
+    "recall": 0.7557,
+    "f1": 0.699,
+    "roc_auc": 0.721,
+    "confusion_matrix": {
+        "tn": 263,
+        "fp": 213,
+        "fn": 128,
+        "tp": 396
+    },
+    "feature_importance": [],
+    "sample_size": 1000
+}

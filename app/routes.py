@@ -12,7 +12,7 @@ import pandas as pd
 from ml_model.preprocessing import preprocess_input
 from ml_model.evaluate_model import get_model_evaluation_metrics
 
-RETRAIN_TOKEN = 'puteraputeri7'
+RETRAIN_TOKEN = 'admin123'
 
 main_bp = Blueprint('main', __name__)
 
@@ -262,6 +262,10 @@ def retrain_model():
             capture_output=True, text=True, timeout=300
         )
         if result.returncode == 0:
+            # 🚀 PROPERLY TRIGGER PLOT GENERATION after training
+            plot_script = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'generate_plots.py')
+            subprocess.run([sys.executable, plot_script], capture_output=True)
+            
             model_labels = {
                 'random_forest': 'Random Forest Classifier',
                 'logistic_regression': 'Logistic Regression (Baseline)',
@@ -269,7 +273,7 @@ def retrain_model():
             }
             return jsonify({
                 'success': True,
-                'message': f"Model retrained successfully using {model_labels[model_type]}!",
+                'message': f"Model retrained and visuals updated successfully using {model_labels[model_type]}!",
                 'log': result.stdout
             })
         else:
@@ -284,6 +288,18 @@ def retrain_model():
         return jsonify({'success': False, 'message': 'Training timed out (>5 min).'}), 500
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+
+
+@main_bp.route('/admin/download_csv')
+@login_required
+def download_csv():
+    """Safety feature: Download the master dataset for verification."""
+    if current_user.role != 'admin':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    csv_path = os.path.join(os.path.dirname(__file__), '..', 'ml_model', 'loan_data.csv')
+    return send_file(csv_path, as_attachment=True, download_name='loan_data_master.csv')
 
 
 @main_bp.route('/admin/data_explorer')
@@ -612,15 +628,18 @@ def admin_dashboard():
     total_users = User.objects.count()
     total_staff = User.objects(role='user').count() # Assuming 'user' role refers to staff
     
-    total_apps = len(applications)
+    total_records = len(applications)
     approved_apps = sum(1 for app in applications if app.prediction == 'Approved')
-    approval_rate = (approved_apps / total_apps * 100) if total_apps > 0 else 0
+    approval_rate = (approved_apps / total_records * 100) if total_records > 0 else 0
+    
+    metrics = get_model_evaluation_metrics()
     
     return render_template('admin_dashboard.html', 
                            applications=applications, 
                            total_users=total_users, 
                            total_staff=total_staff,
-                           approval_rate=round(approval_rate, 1))
+                           approval_rate=round(approval_rate, 1),
+                           metrics=metrics)
 
 
 @main_bp.route('/admin/users')

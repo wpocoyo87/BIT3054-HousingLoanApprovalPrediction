@@ -93,9 +93,9 @@ def generate_data():
         
         if score < 600: is_eligible = False # Credit floor
         
-        # Generate Status based on eligibility + small noise (5%)
+        # Generate Status based on eligibility + higher noise (15%) for realism
         loan_status = 'Y' if is_eligible else 'N'
-        if random.random() < 0.05:
+        if random.random() < 0.15: # Increased noise to match Colab's balanced importance
             loan_status = 'Y' if loan_status == 'N' else 'N'
             
         data.append([

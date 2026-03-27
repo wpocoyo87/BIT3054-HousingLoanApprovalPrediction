@@ -11,3 +11,5 @@ gunicorn
 python-dotenv
 mongomock
 xgboost
+matplotlib
+seaborn

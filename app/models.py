@@ -65,3 +65,14 @@ class Prediction(me.Document):
     application = me.ReferenceField(LoanApplication, required=True, reverse_delete_rule=me.CASCADE)
     result = me.StringField(required=True, max_length=50)
     created_at = me.DateTimeField(default=datetime.utcnow)
+
+class ModelResult(me.Document):
+    meta = {'collection': 'model_results', 'ordering': ['-trained_at']}
+    model_name = me.StringField(required=True)
+    model_type = me.StringField(required=True)
+    accuracy = me.FloatField()
+    precision = me.FloatField()
+    recall = me.FloatField()
+    f1 = me.FloatField()
+    roc_auc = me.FloatField()
+    trained_at = me.DateTimeField(default=datetime.utcnow)

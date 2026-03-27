@@ -57,19 +57,19 @@
                 <div class="row g-0">
                     <div class="col-md-3 border-end p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">Algorithm</p>
-                        <h6 class="fw-800 text-navy mb-0">Random Forest</h6>
+                        <h6 class="fw-800 text-navy mb-0">{{ metrics.model_name if metrics else 'N/A' }}</h6>
                     </div>
                     <div class="col-md-3 border-end p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">Accuracy</p>
-                        <h6 class="fw-800 text-emerald-green mb-0">93.5%</h6>
+                        <h6 class="fw-800 text-emerald-green mb-0">{{ metrics.accuracy if metrics else '0' }}%</h6>
                     </div>
                     <div class="col-md-3 border-end p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">F1 Score</p>
-                        <h6 class="fw-800 text-emerald-green mb-0">0.91</h6>
+                        <h6 class="fw-800 text-emerald-green mb-0">{{ metrics.f1 if metrics else '0' }}</h6>
                     </div>
                     <div class="col-md-3 p-4 text-center">
                         <p class="text-muted small fw-bold text-uppercase mb-2">Last Retrained</p>
-                        <h6 class="fw-800 text-navy mb-0">21 Mar 2026</h6>
+                        <h6 class="fw-800 text-navy mb-0">Today</h6>
                     </div>
 
                 </div>
