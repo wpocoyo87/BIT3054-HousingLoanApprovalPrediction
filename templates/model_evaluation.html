@@ -54,29 +54,33 @@
                     <div class="col-md-6">
                         <div class="p-3 bg-light rounded-3 h-100">
                             <h6 class="fw-bold mb-3">ROC Curve Analysis</h6>
-                            <img src="{{ url_for('static', filename='plots/roc_curve.png') }}" class="img-fluid rounded-3 shadow-sm border" alt="ROC Curve">
+                            <img src="{{ url_for('static', filename='plots/roc_curve.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3 shadow-sm border" alt="ROC Curve">
                             <p class="x-small text-muted mt-2 mb-0">Indicates the model's ability to distinguish between classes. Higher area is better.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 bg-light rounded-3 h-100">
                             <h6 class="fw-bold mb-3">Confusion Matrix (Predicted vs Actual)</h6>
-                            <img src="{{ url_for('static', filename='plots/confusion_matrix.png') }}" class="img-fluid rounded-3 shadow-sm border" alt="Confusion Matrix">
+                            <img src="{{ url_for('static', filename='plots/confusion_matrix.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3 shadow-sm border" alt="Confusion Matrix">
                             <p class="x-small text-muted mt-2 mb-0">Detailed breakdown of true positives/negatives and misclassifications.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 bg-light rounded-3">
                             <h6 class="fw-bold mb-3">DSR vs NDI Decision Separator</h6>
-                            <img src="{{ url_for('static', filename='plots/dsr_ndi_distribution.png') }}" class="img-fluid rounded-3 shadow-sm border" alt="DSR vs NDI">
+                            <img src="{{ url_for('static', filename='plots/dsr_ndi_distribution.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3 shadow-sm border" alt="DSR vs NDI">
                             <p class="x-small text-muted mt-2 mb-0">Visualizes how the key banking metrics influence the model's approval status.</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="p-3 bg-light rounded-3">
+                            {% if 'Logistic' in metrics.model_name %}
+                            <h6 class="fw-bold mb-3">Impact Coefficients (Regression)</h6>
+                            {% else %}
                             <h6 class="fw-bold mb-3">Global Feature Importance</h6>
-                            <img src="{{ url_for('static', filename='plots/feature_importance.png') }}" class="img-fluid rounded-3 shadow-sm border" alt="Feature Importance">
-                            <p class="x-small text-muted mt-2 mb-0">Ranking of features by their contribution to the model's predictive power.</p>
+                            {% endif %}
+                            <img src="{{ url_for('static', filename='plots/feature_importance.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3 shadow-sm border" alt="Model Variables Impact">
+                            <p class="x-small text-muted mt-2 mb-0">Ranking of features by their contribution to the model's predictive power or logic.</p>
                         </div>
                     </div>
                 </div>

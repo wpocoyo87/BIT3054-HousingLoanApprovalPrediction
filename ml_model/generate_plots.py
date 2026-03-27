@@ -83,7 +83,7 @@ if os.path.exists(model_path):
     
     plt.figure(figsize=(8, 6))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Greens', xticklabels=['N', 'Y'], yticklabels=['N', 'Y'])
-    plt.title(f'Random Forest - Confusion Matrix')
+    plt.title(f'{model_name} - Confusion Matrix')
     plt.ylabel('Actual')
     plt.xlabel('Predicted')
     plt.savefig('static/plots/confusion_matrix.png', bbox_inches='tight')
