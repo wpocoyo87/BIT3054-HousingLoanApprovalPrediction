@@ -609,12 +609,56 @@ def result(id):
         suggested_banks = sorted(potential_matches, key=lambda x: x.get('score', 0), reverse=True)
         if len(suggested_banks) > 5:
             suggested_banks = suggested_banks[:5]
-    
-    return render_template('result.html', 
-                           application=application, 
+
+    # --- DSR / NDI Eligibility Comparison View ---
+    dsr_val  = float(application.dsr or 0)
+    ndi_val  = float(application.ndi or 0)
+    income   = float(application.income + application.coapplicant_income)
+    cs_val   = int(application.credit_score or 0)
+
+    # Benchmarks based on Malaysian banking standards
+    dsr_limit  = 60 if income < 5000 else 70          # % ceiling
+    ndi_min    = 1200 if income < 5000 else 1500       # RM floor
+    cs_min     = 650                                    # Credit score floor
+
+    eligibility_checks = [
+        {
+            "metric"    : "Debt Service Ratio (DSR)",
+            "your_value": f"{dsr_val:.1f}%",
+            "benchmark" : f"≤ {dsr_limit}%",
+            "pass"      : dsr_val <= dsr_limit,
+            "note"      : "Ratio of total monthly commitments to gross income"
+        },
+        {
+            "metric"    : "Net Disposable Income (NDI)",
+            "your_value": f"RM {ndi_val:,.2f}",
+            "benchmark" : f"≥ RM {ndi_min:,}",
+            "pass"      : ndi_val >= ndi_min,
+            "note"      : "Remaining income after all monthly commitments"
+        },
+        {
+            "metric"    : "Credit / CCRIS Score",
+            "your_value": str(cs_val),
+            "benchmark" : f"≥ {cs_min}",
+            "pass"      : cs_val >= cs_min,
+            "note"      : "Internal credit health score derived from profile"
+        },
+        {
+            "metric"    : "CCRIS Status",
+            "your_value": (application.ccris_status or "N/A").title(),
+            "benchmark" : "Clean / Good",
+            "pass"      : (application.ccris_status or "").lower() in ["clean", "good"],
+            "note"      : "Credit Reference Information System payment status"
+        },
+    ]
+
+    return render_template('result.html',
+                           application=application,
                            suggested_banks=suggested_banks,
                            ai_insights=ai_insights,
-                           recommended_price=recommended_price)
+                           recommended_price=recommended_price,
+                           eligibility_checks=eligibility_checks)
+
 
 
 @main_bp.route('/admin_dashboard')

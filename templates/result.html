@@ -111,7 +111,59 @@
                         </ul>
                     </div>
 
+                    <!-- Post-Submission Eligibility Re-Assessment -->
+                    {% if eligibility_checks %}
+                    <div class="mt-4 p-4 rounded-4" style="border: 1px solid #e2e8f0; background:#fafafa;">
+                        <h6 class="fw-bold text-navy mb-3">
+                            <i class="bi bi-clipboard2-pulse me-2 text-emerald-green"></i>
+                            Eligibility Re-Assessment — DSR / NDI Comparison
+                        </h6>
+                        <div class="table-responsive rounded-3 overflow-hidden">
+                            <table class="table table-sm mb-0 align-middle" style="border:1px solid #e2e8f0;">
+                                <thead style="background:#0f172a; color:#fff;">
+                                    <tr>
+                                        <th class="py-2 ps-3 small text-uppercase">Metric</th>
+                                        <th class="py-2 text-center small text-uppercase">Your Value</th>
+                                        <th class="py-2 text-center small text-uppercase">Bank Benchmark</th>
+                                        <th class="py-2 text-center small text-uppercase">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for chk in eligibility_checks %}
+                                    <tr style="border-top:1px solid #f1f5f9;">
+                                        <td class="ps-3 py-2">
+                                            <div class="fw-semibold small text-navy">{{ chk.metric }}</div>
+                                            <div class="x-small text-muted">{{ chk.note }}</div>
+                                        </td>
+                                        <td class="text-center fw-bold small {% if chk.pass %}text-emerald-green{% else %}text-danger{% endif %}">
+                                            {{ chk.your_value }}
+                                        </td>
+                                        <td class="text-center small text-muted fw-semibold">{{ chk.benchmark }}</td>
+                                        <td class="text-center">
+                                            {% if chk.pass %}
+                                            <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5; color:#065f46; font-size:0.7rem;">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Pass
+                                            </span>
+                                            {% else %}
+                                            <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2; color:#991b1b; font-size:0.7rem;">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Fail
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="x-small text-muted mt-2 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Benchmarks based on BNM-aligned Malaysian residential financing guidelines. Thresholds adjust by income bracket.
+                        </p>
+                    </div>
+                    {% endif %}
+
                     {% if recommended_price > 0 %}
+
                     <div class="mt-4 p-4 rounded-4 bg-navy text-white shadow-lg">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h6 class="fw-bold mb-0">Affordability Insight</h6>
