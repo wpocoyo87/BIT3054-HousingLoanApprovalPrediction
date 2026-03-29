@@ -5,44 +5,61 @@
 
 {% block content %}
 <!-- Executive Summary Cards -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-primary-navy bg-opacity-10 text-navy">
-                <i class="bi bi-people-fill"></i>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-primary-navy bg-opacity-10 text-navy flex-shrink-0">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ total_users }}</div>
+                    <div class="stat-label-sm">Total Users</div>
+                </div>
             </div>
-            <div class="stat-value">{{ total_users }}</div>
-            <div class="stat-label">Total Users</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-emerald-light text-emerald-green">
-                <i class="bi bi-person-check-fill"></i>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-emerald-light text-emerald-green flex-shrink-0">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ total_staff }}</div>
+                    <div class="stat-label-sm">Active Staff</div>
+                </div>
             </div>
-            <div class="stat-value">{{ total_staff }}</div>
-            <div class="stat-label">Active Staff</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-primary bg-opacity-10 text-primary" style="background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
-                <i class="bi bi-file-earmark-text-fill"></i>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm flex-shrink-0" style="background-color:rgba(13,110,253,0.1);color:#0d6efd;">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ applications|length }}</div>
+                    <div class="stat-label-sm">Applications</div>
+                </div>
             </div>
-            <div class="stat-value">{{ applications|length }}</div>
-            <div class="stat-label">Total Applications</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-emerald-light text-emerald-green">
-                <i class="bi bi-percent"></i>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-emerald-light text-emerald-green flex-shrink-0">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ approval_rate }}%</div>
+                    <div class="stat-label-sm">Approval Rate</div>
+                </div>
             </div>
-            <div class="stat-value">{{ approval_rate }}%</div>
-            <div class="stat-label">Approval Rate</div>
         </div>
     </div>
 </div>
+
 
 
 <!-- Model Performance Overview -->
