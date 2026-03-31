@@ -2,38 +2,38 @@
     "success": true,
     "model_name": "Random Forest Classifier",
     "type": "random_forest",
-    "trained_at": "2026-03-30 19:46:32",
-    "accuracy": 71.8,
-    "precision": 0.7115,
-    "recall": 0.7767,
-    "f1": 0.7427,
-    "roc_auc": 0.7706,
+    "trained_at": "2026-03-31 09:40:10",
+    "accuracy": 98.9,
+    "precision": 0.9881,
+    "recall": 0.9955,
+    "f1": 0.9918,
+    "roc_auc": 0.9995,
     "confusion_matrix": {
-        "tn": 311,
-        "fp": 165,
-        "fn": 117,
-        "tp": 407
+        "tn": 322,
+        "fp": 8,
+        "fn": 3,
+        "tp": 667
     },
     "feature_importance": [
         {
             "name": "Credit Score",
-            "value": 0.3074
-        },
-        {
-            "name": "Ndi",
-            "value": 0.1953
+            "value": 0.7794
         },
         {
             "name": "Dsr",
-            "value": 0.1885
+            "value": 0.0767
+        },
+        {
+            "name": "Ndi",
+            "value": 0.0676
         },
         {
             "name": "Applicantincome",
-            "value": 0.1548
+            "value": 0.0341
         },
         {
             "name": "Monthly Installment",
-            "value": 0.1539
+            "value": 0.0198
         }
     ],
     "sample_size": 1000

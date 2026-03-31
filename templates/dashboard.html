@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Analyst Dashboard{% endblock %}
-{% block page_title %}Financing Analyst Dashboard{% endblock %}
+{% block title %}Mortgage Hub{% endblock %}
+{% block page_title %}Mortgage Analysis Hub{% endblock %}
 
 {% block content %}
 <!-- Quick Stats -->
@@ -49,8 +49,8 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">Recent Financing Assessments</h5>
-                <a href="{{ url_for('main.loan_form') }}" class="btn btn-navy btn-sm px-3 rounded-pill">View All</a>
+                <h5 class="card-title mb-0 fw-800 text-navy">Recent Mortgage Assessments</h5>
+                <a href="{{ url_for('main.history') }}" class="btn btn-navy btn-sm px-4 rounded-pill shadow-sm">View All</a>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -128,8 +128,8 @@
 
         <div class="card border-0 shadow-sm bg-primary-navy text-white overflow-hidden" style="background: var(--primary-navy)">
             <div class="card-body p-4 position-relative" style="z-index: 1;">
-                <h6 class="text-emerald-green fw-bold mb-2">Internal Notice</h6>
-                <p class="small mb-0 opacity-75">All financing assessments are processed using the latest Model V2.4. Threshold updated on 15/03/2026.</p>
+                <h6 class="text-emerald-green fw-bold mb-2">System Performance</h6>
+                <p class="small mb-0 opacity-75">All mortgage assessments are processed using the latest Model V2.4. Threshold updated on 15/03/2026.</p>
                 <i class="bi bi-shield-check position-absolute bottom-0 end-0 m-3 opacity-10" style="font-size: 4rem;"></i>
             </div>
         </div>
