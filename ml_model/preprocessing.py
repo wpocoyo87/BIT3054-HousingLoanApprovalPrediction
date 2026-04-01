@@ -23,14 +23,12 @@ def preprocess_training_data(df):
     df['Education'] = df['Education'].astype(str).str.title()
     df['Education'] = df['Education'].map({'Graduate': 1, 'Not Graduate': 0, '1': 1, '0': 0}).fillna(0)
     
-    # 2. Dynamic NDI Buffer calculation (Bank Officer Logic)
-    # Urban: 1500 + (200 * Dep), Semiurban: 1200 + (150 * Dep), Rural: 1000 + (100 * Dep)
+    # 2. Dynamic NDI Buffer calculation (Area-Aware Logic)
     def get_ndi_threshold(row):
         area = str(row.get('Property_Area', 'Urban'))
-        dep = int(row.get('Dependents', 0))
-        if area == 'Urban': return 1500 + (200 * dep)
-        if area == 'Semiurban': return 1200 + (150 * dep)
-        return 1000 + (100 * dep)
+        if area == 'Urban': return 1500
+        if area == 'Semiurban': return 1200
+        return 1000
 
     # 3. Feature Engineering
     stress_ir = 6.5 / 100 / 12
@@ -45,17 +43,14 @@ def preprocess_training_data(df):
     
     df['Monthly_Installment'] = actual_inst 
     df['DSR'] = (stress_inst / total_income.replace(0, 1)) * 100
-    df['NDI'] = total_income - actual_inst - df.get('Monthly_Commitments', 0) # Correct NDI: Net after house + other debts
+    df['NDI'] = total_income - actual_inst - df.get('Monthly_Commitments', 0).fillna(0)
     
-    # Ensuring NDI is actual Monthly Surplus (After ALL commitments)
-    # If the user provides commitments, we should subtract them here too
-    # For now, let's keep it consistent: Income - Installment
-
-    # 4. Corrected Labeling Logic (Industry Standard) - APPLY TO ALL DATA
+    # 4. Professional Labeling Logic (Experience & Area Aware)
     df['NDI_Threshold'] = df.apply(get_ndi_threshold, axis=1)
+    dsr_limit = np.where(df['Years_Employed'] >= 1, 75, 65)
     
     df['Loan_Status'] = np.where(
-        (df['DSR'] < 75) & # Standard limit for 1+ year employment
+        (df['DSR'] <= dsr_limit) & 
         (df['NDI'] >= df['NDI_Threshold']) &
         (df['Credit_Score'].fillna(600) >= 650) &
         (df['Credit_History'] > 0.5),
