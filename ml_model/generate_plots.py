@@ -4,6 +4,7 @@ import seaborn as sns
 import joblib
 import os
 import sys
+
 # Add path for preprocessing
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
@@ -17,95 +18,111 @@ os.makedirs('static/plots', exist_ok=True)
 # 1. Load Data
 df = pd.read_csv('ml_model/loan_data.csv')
 
-# Preprocess to get the EXACT DSR and NDI values used in Colab/Training
+# Preprocess to get the EXACT DSR and NDI values
 X, y = preprocess_training_data(df)
 plot_df = X.copy()
-plot_df['Loan_Status'] = y.map({1: 'Y', 0: 'N'})
+# Note: we use 1 and 0 based on preprocessing label encoding mapping 
+plot_df['Loan_Status'] = y.map({1: 1, 0: 0}) 
 
-# 2. Correlation Heatmap
-plt.figure(figsize=(12, 10))
-# Select only numeric for correlation
-numeric_df = plot_df.select_dtypes(include=['float64', 'int64'])
-sns.heatmap(numeric_df.corr(), annot=True, cmap='coolwarm', fmt='.2f')
-plt.title('Feature Correlation Heatmap (Malaysian Loan Data)')
-plt.savefig('static/plots/correlation_heatmap.png', bbox_inches='tight')
+# ====================== 1. DSR vs NDI Plot (on top, separate) ======================
+plt.figure(figsize=(12, 7))
+sns.scatterplot(data=plot_df, x='NDI', y='DSR', 
+                hue='Loan_Status', 
+                palette={1: '#2ecc71', 0: '#e74c3c'}, 
+                alpha=0.6)
+
+plt.title('Decision Boundary: DSR vs NDI', fontsize=16, fontweight='bold', pad=20)
+plt.axhline(y=75, color='gray', linestyle='--', linewidth=2, label='Max DSR Limit')
+plt.axvline(x=1500, color='gray', linestyle=':', linewidth=2, label='Urban Min NDI')
+plt.xlim(0, max(plot_df['NDI'].quantile(0.95), 5000))
+plt.xlabel('NDI')
+plt.ylabel('DSR')
+plt.legend(title="Loan Status (1=Yes, 0=No)", loc='upper right')
+plt.tight_layout()
+plt.savefig('static/plots/dsr_ndi_distribution.png', bbox_inches='tight')
 plt.close()
 
-# 3. DSR vs. NDI Distribution
-plt.figure(figsize=(10, 6))
-sns.scatterplot(data=plot_df, x='DSR', y='NDI', hue='Loan_Status', alpha=0.5, hue_order=['N', 'Y'])
-plt.axvline(x=70, color='red', linestyle='--', label='DSR Limit (70%)')
-plt.axhline(y=1500, color='blue', linestyle='--', label='Urban NDI Limit (RM 1,500)')
-plt.title('DSR vs NDI - Separation of Loan Status')
-plt.legend()
-plt.savefig('static/plots/dsr_ndi_distribution.png')
-plt.close()
 
-# 4. Feature Importance (from trained model)
+# ====================== 2. Main Dashboard - 1x3 Horizontal ======================
 model_path = 'ml_model/model.pkl'
 if os.path.exists(model_path):
     import numpy as np
     from sklearn.model_selection import train_test_split
+    from sklearn.metrics import confusion_matrix, roc_curve, auc
     
     model = joblib.load(model_path)
     
     # Strictly use the SAME split as evaluation (20% test)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     
-    model_name = type(model).__name__
+    model_name_map = {
+        'RandomForestClassifier': 'Random Forest',
+        'LogisticRegression': 'Logistic Regression',
+        'XGBClassifier': 'XGBoost',
+        'HistGradientBoostingClassifier': 'XGBoost (HistGradientBoosting)'
+    }
+    raw_name = type(model).__name__
+    model_name = model_name_map.get(raw_name, raw_name)
     
-    # Feature Importance (derived from training or model itself)
-    if hasattr(model, 'feature_importances_'):
-        importances = model.feature_importances_
-        importances = importances / importances.sum()
-        title_text = f'{model_name} - Feature Importance'
-    elif hasattr(model, 'coef_'):
-        # For Logistic Regression, keep raw coefficients (so negatives show accurately)
-        importances = model.coef_[0]
-        title_text = f'{model_name} - Coefficients'
-    else:
-        importances = np.random.uniform(0.1, 0.4, size=X.shape[1])
-        title_text = f'{model_name} - Feature Importance'
-    
-    features = X.columns
-    feat_importances = pd.Series(importances, index=features).sort_values(ascending=True)
-    plt.figure(figsize=(10, 8))
-    feat_importances.plot(kind='barh', color='#1f77b4')
-    plt.title(title_text)
-    plt.xlabel('Importance')
-    plt.savefig('static/plots/feature_importance.png', bbox_inches='tight')
-    plt.close()
+    fig, axes = plt.subplots(1, 3, figsize=(20, 7))   # Wide horizontal layout
+    fig.suptitle(f'Housing Loan Approval - {model_name} Dashboard', 
+                 fontsize=20, fontweight='bold', y=1.02)
 
-    # 5. Confusion Matrix (MUST use 20% Test Set)
-    from sklearn.metrics import confusion_matrix
-    y_test_pred = model.predict(X_test)
-    cm = confusion_matrix(y_test, y_test_pred)
-    
-    plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Greens', xticklabels=['N', 'Y'], yticklabels=['N', 'Y'])
-    plt.title(f'{model_name} - Confusion Matrix')
-    plt.ylabel('Actual')
-    plt.xlabel('Predicted')
-    plt.savefig('static/plots/confusion_matrix.png', bbox_inches='tight')
-    plt.close()
-
-    # 6. ROC Curve (MUST use 20% Test Set)
-    from sklearn.metrics import roc_curve, auc
-    if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X_test)[:, 1]
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        roc_auc = auc(fpr, tpr)
+    # 1. Feature Importance
+    ax1 = axes[0]
+    if hasattr(model, "feature_importances_"):
+        importances = pd.Series(model.feature_importances_, index=X_test.columns)
+        importances = importances.sort_values(ascending=False)
+        sns.barplot(x=importances.values, y=importances.index, palette='viridis', ax=ax1)
+        ax1.set_title('1. Feature Importance Analysis', fontsize=14, fontweight='bold')
+        ax1.set_xlabel('Relative Importance Weight')
         
-        plt.figure(figsize=(8, 6))
-        plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title(f'ROC Curve (20% Test Set - {type(model).__name__})')
-        plt.legend(loc="lower right")
-        plt.savefig('static/plots/roc_curve.png', bbox_inches='tight')
-        plt.close()
+    elif hasattr(model, "coef_"):
+        coefs = pd.Series(model.coef_[0], index=X_test.columns)
+        coefs = coefs.sort_values(ascending=False)
+        sns.barplot(x=coefs.values, y=coefs.index, palette='viridis', ax=ax1)
+        ax1.set_title('1. Feature Importance (Coefficients)', fontsize=14, fontweight='bold')
+        ax1.set_xlabel('Coefficient Value')
 
-print("Successfully generated all project visuals in static/plots/")
+    # 2. Confusion Matrix
+    ax2 = axes[1]
+    y_pred = model.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred)
+    
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Greens',
+                xticklabels=['Rejected (0)', 'Approved (1)'], 
+                yticklabels=['Rejected (0)', 'Approved (1)'],
+                annot_kws={"size": 14}, ax=ax2)
+    
+    ax2.set_title('2. Confusion Matrix', fontsize=14, fontweight='bold')
+    ax2.set_ylabel('Actual Status (Ground Truth)')
+    ax2.set_xlabel('AI Predicted Status')
+
+    # 3. ROC Curve
+    ax3 = axes[2]
+    try:
+        y_prob = model.predict_proba(X_test)[:, 1]
+    except AttributeError:
+        # Fallback if probability is not supported
+        y_prob = model.predict(X_test)
+        
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    roc_auc = auc(fpr, tpr)
+
+    ax3.plot(fpr, tpr, color='darkorange', lw=3, 
+             label=f'ROC Curve (AUC = {roc_auc:.4f})')
+    ax3.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    ax3.fill_between(fpr, tpr, color='darkorange', alpha=0.1)
+
+    ax3.set_xlim([0.0, 1.0])
+    ax3.set_ylim([0.0, 1.05])
+    ax3.set_title('3. ROC Curve Analysis', fontsize=14, fontweight='bold')
+    ax3.set_xlabel('False Positive Rate')
+    ax3.set_ylabel('True Positive Rate')
+    ax3.legend(loc="lower right", fontsize=11)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig('static/plots/model_dashboard.png', bbox_inches='tight')
+    plt.close()
+
+print("Successfully generated DSR distribution and dynamic 1x3 model dashboard in static/plots/")

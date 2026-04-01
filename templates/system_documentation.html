@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}System Documentation{% endblock %}
+{% block page_title %}System Documentation{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-5">
+            <h3 class="mb-4 fw-bold text-navy"><i class="bi bi-book me-2"></i> Mortgage Analysis Hub Documentation</h3>
+            <p class="lead">Welcome to the Mortgage Hub. This system acts as a smart gateway, utilizing Advanced Machine Learning to evaluate Malaysian housing loan affordability based on authentic Bank Officer rules.</p>
+            
+            <hr class="my-4">
+            
+            <h5 class="fw-bold text-emerald-green"><i class="bi bi-gear-fill me-2"></i> 1. Core Evaluation Logic</h5>
+            <p>The system evaluates applications using a robust Machine Learning algorithm (Random Forest) trained on a synthetic dataset representing realistic Malaysian financial profiles.</p>
+            <ul>
+                <li><strong>Debt Service Ratio (DSR):</strong> The system uses a dynamic DSR limit (up to 75% for experienced candidates) mapped against industry norms.</li>
+                <li><strong>Net Disposable Income (NDI):</strong> An absolute buffer constraint. Urban locations typically require an NDI of RM1,500.</li>
+                <li><strong>Credit Score / CCRIS:</strong> The system enforces a strict checking mechanism where scores below 650 will typically trigger high-risk rejections, mimicking actual bank operations.</li>
+            </ul>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-emerald-green"><i class="bi bi-people-fill me-2"></i> 2. Role-Based Access Control</h5>
+            <ul>
+                <li><strong>Admin (Manager):</strong> Can access the full Dataset Explorer, trigger Model Retraining manually, manage other users, and access the "All Records" oversight panel.</li>
+                <li><strong>User (Analyst):</strong> Focused purely on conducting new loan assessments, reviewing individual predictions, and exporting basic reports for their cases.</li>
+            </ul>
+
+            <hr class="my-4">
+
+            <h5 class="fw-bold text-emerald-green"><i class="bi bi-graph-up me-2"></i> 3. Export Monthly Report</h5>
+            <p>The <strong>Export Monthly Report</strong> feature automatically packages the assessment history into a structured CSV file. Admins will receive a comprehensive dump of all applications, whereas standard users will only export the assessments they generated themselves.</p>
+            <p>It is recommended to generate this report on the 1st of every month to consolidate branch/team performance.</p>
+
+            <div class="mt-5 text-center">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-navy px-4 py-2 rounded-pill"><i class="bi bi-arrow-left me-2"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

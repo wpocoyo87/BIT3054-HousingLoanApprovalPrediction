@@ -1,40 +1,19 @@
 {
     "success": true,
-    "model_name": "Random Forest Classifier",
-    "type": "random_forest",
-    "trained_at": "2026-03-31 09:40:10",
-    "accuracy": 98.9,
-    "precision": 0.9881,
-    "recall": 0.9955,
-    "f1": 0.9918,
-    "roc_auc": 0.9995,
+    "model_name": "Logistic Regression",
+    "type": "logistic_regression",
+    "trained_at": "2026-04-01 19:56:18",
+    "accuracy": 79.7,
+    "precision": 0.7563,
+    "recall": 0.6995,
+    "f1": 0.7268,
+    "roc_auc": 0.852,
     "confusion_matrix": {
-        "tn": 322,
-        "fp": 8,
-        "fn": 3,
-        "tp": 667
+        "tn": 527,
+        "fp": 87,
+        "fn": 116,
+        "tp": 270
     },
-    "feature_importance": [
-        {
-            "name": "Credit Score",
-            "value": 0.7794
-        },
-        {
-            "name": "Dsr",
-            "value": 0.0767
-        },
-        {
-            "name": "Ndi",
-            "value": 0.0676
-        },
-        {
-            "name": "Applicantincome",
-            "value": 0.0341
-        },
-        {
-            "name": "Monthly Installment",
-            "value": 0.0198
-        }
-    ],
+    "feature_importance": [],
     "sample_size": 1000
 }

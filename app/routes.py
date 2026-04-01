@@ -424,6 +424,47 @@ def model_evaluation():
         flash('Evaluation metrics not found. Please train a model first.', 'warning')
         return render_template('model_evaluation.html', metrics=None)
 
+@main_bp.route('/export_report')
+@login_required
+def export_report():
+    import io
+    import csv
+    if current_user.role == 'admin':
+        apps = LoanApplication.objects().order_by('-created_at')
+    else:
+        apps = LoanApplication.objects(user=current_user.id).order_by('-created_at')
+        
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Application ID', 'Date', 'Applicant Name', 'Joint Applicant', 'Total Income (RM)', 'Loan Amount (RM)', 'DSR (%)', 'NDI (RM)', 'Credit Score', 'Status Prediction'])
+    
+    for app in apps:
+        total_income = float(app.income or 0) + float(app.coapplicant_income or 0)
+        writer.writerow([
+            str(app.id)[-6:].upper(),
+            app.created_at.strftime('%Y-%m-%d'),
+            app.full_name or 'N/A',
+            app.joint_applicant or 'No',
+            f"{total_income:.2f}",
+            f"{float(app.loan_amount or 0):.2f}",
+            f"{float(app.dsr or 0):.1f}",
+            f"{float(app.ndi or 0):.2f}",
+            str(app.credit_score) if app.credit_score else 'N/A',
+            app.prediction or 'Pending'
+        ])
+        
+    output.seek(0)
+    bytes_io = io.BytesIO(output.getvalue().encode('utf-8'))
+    return send_file(bytes_io, 
+                     mimetype='text/csv', 
+                     as_attachment=True, 
+                     download_name='monthly_assessment_report.csv')
+
+@main_bp.route('/system_docs')
+@login_required
+def system_docs():
+    return render_template('system_documentation.html')
+
 @main_bp.route('/result/<id>')
 @login_required
 def result(id):
