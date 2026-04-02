@@ -19,7 +19,7 @@
                         </span>
                         <input type="text" name="q" class="form-control border-start-0"
                                style="height:38px; font-size:0.875rem;"
-                               placeholder="Client name, Ref ID, Staff..." value="{{ q }}">
+                               placeholder="Client name, Ref ID, Analyst..." value="{{ q }}">
                     </div>
                 </div>
                 <!-- Status -->
@@ -80,7 +80,7 @@
                 <tr>
                     <th class="ps-4 py-3 small text-uppercase fw-700" style="min-width:90px;">Ref ID</th>
                     <th class="py-3 small text-uppercase fw-700" style="min-width:140px;">Client Name</th>
-                    <th class="py-3 small text-uppercase fw-700" style="min-width:130px;">Staff User</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:130px;">Analyst</th>
                     <th class="py-3 small text-uppercase fw-700" style="min-width:110px;">Income (RM)</th>
                     <th class="py-3 small text-uppercase fw-700" style="min-width:110px;">Loan Amount</th>
                     <th class="py-3 small text-uppercase fw-700" style="min-width:80px;">DSR (%)</th>
@@ -107,7 +107,7 @@
                         <div class="fw-semibold small">{{ app.full_name or '—' }}</div>
                         <div class="x-small text-muted">{{ app.nric or '' }}</div>
                     </td>
-                    <!-- Staff -->
+                    <!-- Analyst -->
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             <img src="https://ui-avatars.com/api/?name={{ app.user.name | urlencode }}&background=0a192f&color=fff&rounded=true&size=22"

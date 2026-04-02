@@ -5,41 +5,41 @@
 
 {% block content %}
 <!-- Quick Stats -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3">
-        <div class="card stat-card border-0 text-white" style="background: linear-gradient(135deg, #0a192f 0%, #112240 100%);">
-            <div class="stat-icon bg-white bg-opacity-20">
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 shadow-sm text-white h-100" style="background: linear-gradient(135deg, #0a192f 0%, #112240 100%);">
+            <div class="stat-icon-sm bg-white bg-opacity-20 mb-2">
                 <i class="bi bi-file-earmark-text"></i>
             </div>
-            <div class="stat-value text-white">{{ applications|length }}</div>
-            <div class="stat-label text-white-50">Total Applications</div>
+            <div class="stat-value-sm text-white">{{ applications|length }}</div>
+            <div class="stat-label-sm text-white-50">Total Applications</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-emerald-light text-emerald-green">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 shadow-sm h-100">
+            <div class="stat-icon-sm bg-emerald-light text-emerald-green mb-2">
                 <i class="bi bi-check-circle-fill"></i>
             </div>
-            <div class="stat-value">{{ approved }}</div>
-            <div class="stat-label">Approved Predictions</div>
+            <div class="stat-value-sm">{{ approved }}</div>
+            <div class="stat-label-sm">Approved</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 shadow-sm h-100">
+            <div class="stat-icon-sm bg-danger bg-opacity-10 text-danger mb-2">
                 <i class="bi bi-x-circle-fill"></i>
             </div>
-            <div class="stat-value">{{ rejected }}</div>
-            <div class="stat-label">Rejected Predictions</div>
+            <div class="stat-value-sm">{{ rejected }}</div>
+            <div class="stat-label-sm">Rejected</div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card border-0">
-            <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 shadow-sm h-100">
+            <div class="stat-icon-sm bg-warning bg-opacity-10 text-warning mb-2">
                 <i class="bi bi-clock-fill"></i>
             </div>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Pending Reviews</div>
+            <div class="stat-value-sm">0</div>
+            <div class="stat-label-sm">Pending</div>
         </div>
     </div>
 </div>
@@ -52,7 +52,8 @@
                 <h5 class="card-title mb-0 fw-800 text-navy">Recent Mortgage Assessments</h5>
                 <a href="{{ url_for('main.history') }}" class="btn btn-navy btn-sm px-4 rounded-pill shadow-sm">View All</a>
             </div>
-            <div class="table-responsive">
+            <!-- Desktop View Table -->
+            <div class="table-responsive d-none d-md-block">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
@@ -92,18 +93,48 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        {% if not applications %}
-                        <tr>
-                            <td colspan="5" class="text-center py-5">
-                                <i class="bi bi-inbox text-muted display-4 mb-3 d-block"></i>
-                                <p class="text-muted fw-bold">No assessments found yet.</p>
-                                <a href="{{ url_for('main.loan_form') }}" class="btn btn-emerald-green btn-sm text-white">Start New Assessment</a>
-                            </td>
-                        </tr>
-                        {% endif %}
                     </tbody>
                 </table>
             </div>
+
+            <!-- Mobile View (Clean List Format) -->
+            <div class="d-md-none">
+                <div class="vstack gap-0">
+                    {% for app in applications[:10] %}
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <div class="overflow-hidden">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="fw-800 text-navy small">#{{ (app.id | string)[-6:] | upper }}</span>
+                                <span class="x-small text-muted opacity-50">·</span>
+                                <span class="x-small text-muted">{{ app.created_at.strftime('%d %b %Y') }}</span>
+                            </div>
+                            <div class="fw-bold text-navy h6 mb-1">RM {{ "{:,.0f}".format(app.loan_amount) }}</div>
+                            <div class="x-small text-muted text-truncate">{{ app.state or 'Selangor' }} · <span class="text-emerald-green fw-bold">{{ app.financing_type or 'Islamic' }}</span></div>
+                        </div>
+                        <div class="text-end ms-3">
+                            <div class="mb-2">
+                                {% if app.prediction == 'Approved' %}
+                                <span class="badge-approved x-small px-2 py-1"><i class="bi bi-check2-circle"></i></span>
+                                {% elif app.prediction == 'Rejected' %}
+                                <span class="badge-rejected x-small px-2 py-1"><i class="bi bi-x-circle"></i></span>
+                                {% else %}
+                                <span class="badge bg-light text-muted x-small border px-2 py-1"><i class="bi bi-clock"></i></span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ url_for('main.result', id=app.id) }}" class="btn btn-navy py-1 px-3 rounded-pill shadow-sm" style="font-size: 0.65rem; letter-spacing: 0.05em;">DETAILS</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if not applications %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted display-4 mb-3 d-block"></i>
+                <p class="text-muted fw-bold">No assessments found yet.</p>
+                <a href="{{ url_for('main.loan_form') }}" class="btn btn-emerald-green btn-sm text-white">Start New Assessment</a>
+            </div>
+            {% endif %}
         </div>
     </div>
 

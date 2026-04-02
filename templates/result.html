@@ -9,8 +9,8 @@
         <!-- Main Decision Card -->
         <div class="card border-0 shadow-lg overflow-hidden mb-5" id="printableCard">
             <div class="row g-0">
-                <div class="col-md-4 text-white p-5 d-flex flex-column align-items-center justify-content-center text-center"
-                    style="background: {% if application.prediction == 'Approved' %}linear-gradient(135deg, #10b981 0%, #065f46 100%){% else %}linear-gradient(135deg, #ef4444 0%, #991b1b 100%){% endif %}; min-height: 400px;">
+                <div class="col-md-4 text-white p-4 p-md-5 d-flex flex-column align-items-center justify-content-center text-center"
+                    style="background: {% if application.prediction == 'Approved' %}linear-gradient(135deg, #10b981 0%, #065f46 100%){% else %}linear-gradient(135deg, #ef4444 0%, #991b1b 100%){% endif %}; min-height: 280px;">
                     <div class="bg-white bg-opacity-20 rounded-circle mb-4 d-flex align-items-center justify-content-center" 
                          style="width: 120px; height: 120px; margin: 0 auto;">
                         {% if application.prediction == 'Approved' %}
@@ -33,7 +33,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-8 p-5">
+                <div class="col-md-8 p-4 p-md-5">
                     <div class="d-flex justify-content-between align-items-start mb-4">
                         <div>
                             <h4 class="text-navy fw-800 mb-1">Assessment Summary</h4>
@@ -158,7 +158,8 @@
                             <i class="bi bi-clipboard2-pulse me-2 text-emerald-green"></i>
                             Eligibility Re-Assessment — DSR / NDI Comparison
                         </h6>
-                        <div class="table-responsive rounded-3 overflow-hidden">
+                        <!-- Desktop Table View -->
+                        <div class="table-responsive rounded-3 overflow-hidden d-none d-md-block">
                             <table class="table table-sm mb-0 align-middle" style="border:1px solid #e2e8f0;">
                                 <thead style="background:#0f172a; color:#fff;">
                                     <tr>
@@ -194,6 +195,41 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile List View -->
+                        <div class="d-md-none">
+                            <div class="vstack gap-3">
+                                {% for chk in eligibility_checks %}
+                                <div class="p-3 rounded-4 border bg-white shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <div class="fw-bold text-navy mb-0 small">{{ chk.metric }}</div>
+                                            <div class="x-small text-muted" style="line-height:1.2;">{{ chk.note }}</div>
+                                        </div>
+                                        {% if chk.pass %}
+                                        <span class="badge rounded-pill px-2 py-1" style="background:#d1fae5; color:#065f46; font-size:0.6rem;">
+                                            <i class="bi bi-check-circle-fill"></i> PASS
+                                        </span>
+                                        {% else %}
+                                        <span class="badge rounded-pill px-2 py-1" style="background:#fee2e2; color:#991b1b; font-size:0.6rem;">
+                                            <i class="bi bi-x-circle-fill"></i> FAIL
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row g-2 pt-2 border-top">
+                                        <div class="col-6">
+                                            <div class="x-small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem;">Your Value</div>
+                                            <div class="small fw-bold {% if chk.pass %}text-emerald-green{% else %}text-danger{% endif %}">{{ chk.your_value }}</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <div class="x-small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem;">Benchmark</div>
+                                            <div class="small fw-bold text-navy">{{ chk.benchmark }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                         <p class="x-small text-muted mt-2 mb-0">
                             <i class="bi bi-info-circle me-1"></i>
@@ -263,20 +299,20 @@
 
 
             <div class="card-footer bg-white border-top-0 p-4 border-top">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <button class="btn btn-light px-4 fw-bold rounded-pill border me-2" onclick="window.print()">
-                            <i class="bi bi-printer me-2"></i> Print Summary
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border flex-grow-1" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i> Print
                         </button>
-                        <button class="btn btn-light px-4 fw-bold rounded-pill border" id="btnDownloadPDF">
-                            <i class="bi bi-download me-2"></i> PDF Report
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border flex-grow-1" id="btnDownloadPDF">
+                            <i class="bi bi-download me-2"></i> PDF
                         </button>
                     </div>
-                    <div>
+                    <div class="d-flex flex-column flex-md-row gap-2">
                         <a href="{{ url_for('main.loan_form', id=application.id) }}"
-                            class="btn btn-outline-navy px-4 fw-bold rounded-pill me-2">Edit Analysis</a>
+                            class="btn btn-outline-navy px-4 fw-bold rounded-pill">Edit analysis</a>
                         <a href="{{ url_for('main.loan_form') }}"
-                            class="btn btn-navy px-4 fw-bold rounded-pill me-2">New Assessment</a>
+                            class="btn btn-navy px-4 fw-bold rounded-pill">New Assessment</a>
                         <a href="{{ url_for('main.dashboard') }}"
                             class="btn btn-emerald-green text-white px-5 fw-bold rounded-pill shadow">Save Record</a>
                     </div>
