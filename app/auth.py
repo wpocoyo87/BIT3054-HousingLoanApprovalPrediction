@@ -43,6 +43,10 @@ def register_dummy():
         user = User(name='Test User', email='user@test.com', password=generate_password_hash('password'), role='user')
         user.save()
     if not User.objects(email='admin@test.com').first():
-        admin = User(name='Test Admin', email='admin@test.com', password=generate_password_hash('admin'), role='admin')
+        admin = User(name='Test Admin', email='admin@test.com', password=generate_password_hash('admin123'), role='admin')
         admin.save()
-    return "Dummy users created! user@test.com:password | admin@test.com:admin", 200
+    if not User.objects(email='staff@test.com').first():
+        staff = User(name='Test Staff', email='staff@test.com', password=generate_password_hash('staff123'), role='staff')
+        staff.save()
+    return "Dummy users created! staff@test.com:staff123 | admin@test.com:admin123", 200
+

@@ -1,46 +1,221 @@
 {% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Executive Admin Console{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-dark">Admin Console</h2>
+<!-- Executive Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-primary-navy bg-opacity-10 text-navy flex-shrink-0">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ total_users }}</div>
+                    <div class="stat-label-sm">Total Users</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-emerald-light text-emerald-green flex-shrink-0">
+                    <i class="bi bi-person-check-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ total_loan_analysts }}</div>
+                    <div class="stat-label-sm">Loan Analysts</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm flex-shrink-0" style="background-color:rgba(13,110,253,0.1);color:#0d6efd;">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ applications|length }}</div>
+                    <div class="stat-label-sm">Applications</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card-compact border-0 h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="stat-icon-sm bg-emerald-light text-emerald-green flex-shrink-0">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <div>
+                    <div class="stat-value-sm">{{ approval_rate }}%</div>
+                    <div class="stat-label-sm">Approval Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-3">
-    <div class="card-header bg-white border-0 py-3">
-        <h5 class="mb-0 fw-bold text-primary">All Network Loan Applications</h5>
+
+
+<!-- Model Performance Overview -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm overflow-hidden">
+            <div class="card-header bg-navy text-white p-4 d-flex justify-content-between align-items-center" style="background: var(--primary-navy)">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-cpu-fill me-2"></i> Current Model Status</h5>
+                <span class="badge bg-emerald-green text-white px-3 py-2 rounded-pill">Model v2.4 Active</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="row g-0">
+                    <div class="col-md-3 border-end mobile-border-end-0 p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Algorithm</p>
+                        <h6 class="fw-800 text-navy mb-0">{{ metrics.model_name if metrics else 'N/A' }}</h6>
+                    </div>
+                    <div class="col-md-3 border-end mobile-border-end-0 p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Accuracy</p>
+                        <h6 class="fw-800 text-emerald-green mb-0">{{ metrics.accuracy if metrics else '0' }}%</h6>
+                    </div>
+                    <div class="col-md-3 border-end mobile-border-end-0 p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">F1 Score</p>
+                        <h6 class="fw-800 text-emerald-green mb-0">{{ metrics.f1 if metrics else '0' }}</h6>
+                    </div>
+                    <div class="col-md-3 p-4 text-center">
+                        <p class="text-muted small fw-bold text-uppercase mb-2">Last Retrained</p>
+                        <h6 class="fw-800 text-navy mb-0">{{ metrics.trained_at[:10] if metrics and metrics.trained_at else 'N/A' }}</h6>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Global Application Logs -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-0 py-4 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <h5 class="card-title mb-0">System-wide Prediction Logs</h5>
+        <div class="d-flex flex-column flex-sm-row gap-2 w-100" style="max-width: 400px;">
+            <div class="input-group input-group-sm w-100">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="logSearch" class="form-control border-start-0 ps-0" placeholder="Filter logs...">
+            </div>
+            <button class="btn btn-emerald-green btn-sm px-3 text-white rounded-pill shadow-sm w-100 w-sm-auto" style="min-width: 120px;" id="btnExportCSV">
+                <i class="bi bi-download me-1"></i> Export CSV
+            </button>
+        </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-dark text-white">
+        <table class="table table-hover align-middle mb-0 w-100" id="logTable">
+            <colgroup>
+                <col style="width: 12%;"> <!-- Ref ID -->
+                <col style="width: 22%;"> <!-- User -->
+                <col class="d-none d-md-table-cell" style="width: 16%;"> <!-- Income -->
+                <col style="width: 18%;"> <!-- Prediction -->
+                <col class="d-none d-lg-table-cell" style="width: 15%;"> <!-- Confidence -->
+                <col class="d-none d-md-table-cell" style="width: 17%;"> <!-- Timestamp -->
+            </colgroup>
+            <thead class="bg-light">
                 <tr>
-                    <th class="py-3 px-4">Ref ID</th>
-                    <th class="py-3">Processed By</th>
-                    <th class="py-3">Income</th>
-                    <th class="py-3">Loan Amt</th>
-                    <th class="py-3">Credit His.</th>
-                    <th class="py-3">Prediction</th>
-                    <th class="py-3 px-4">Timestamp</th>
+                    <th class="ps-4 py-3 small text-uppercase text-muted fw-800">Ref ID</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">User</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800 d-none d-md-table-cell">Income (RM)</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800">Prediction</th>
+                    <th class="py-3 small text-uppercase text-muted fw-800 d-none d-lg-table-cell text-nowrap">Confidence</th>
+                    <th class="pe-4 py-3 small text-uppercase text-muted fw-800 text-end d-none d-md-table-cell text-nowrap">Timestamp</th>
                 </tr>
             </thead>
             <tbody>
                 {% for app in applications %}
                 <tr>
-                    <td class="px-4 fw-bold text-secondary">#{{ app.id }}</td>
-                    <td class="fw-semibold">{{ app.user.name }}</td>
-                    <td>${{ app.income }}</td>
-                    <td>${{ app.loan_amount }}</td>
-                    <td>{{ app.credit_score }}</td>
+                    <td class="ps-4">
+                        <div class="fw-bold text-navy small">#{{ (app.id | string)[-6:] | upper }}</div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="https://ui-avatars.com/api/?name={{ app.user.name | urlencode }}&background=0a192f&color=fff&rounded=true&size=24" alt="Avatar" class="rounded-circle shadow-sm">
+                            <span class="fw-semibold text-secondary small">{{ app.user.name }}</span>
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <div class="fw-bold small">RM {{ "{:,.2f}".format(app.income) }}</div>
+                    </td>
                     <td>
                         {% if app.prediction == 'Approved' %}
-                            <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill border border-success-subtle">Approved</span>
+                        <span class="badge-approved"><i class="bi bi-check2-circle me-1"></i>Approved</span>
                         {% else %}
-                            <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill border border-danger-subtle">Rejected</span>
+                        <span class="badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>
                         {% endif %}
                     </td>
-                    <td class="px-4 text-muted small">{{ app.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td class="d-none d-lg-table-cell text-nowrap">
+                        <div class="progress" style="height: 6px; width: 100%; max-width: 80px;">
+                            <div class="progress-bar bg-emerald-green" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="x-small fw-bold text-muted">85%</span>
+                    </td>
+                    <td class="pe-4 text-end text-muted x-small d-none d-md-table-cell text-nowrap">
+                        {{ app.created_at.strftime('%d %b %Y, %H:%M') }}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    <div class="card-footer bg-white border-0 py-3 text-center">
+        <a href="{{ url_for('main.history') }}" class="small fw-bold text-emerald-green text-decoration-none">
+            View All Application Records <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Search/Filter Logic
+    const searchInput = document.getElementById('logSearch');
+    const table = document.getElementById('logTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        
+        Array.from(rows).forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(query) ? '' : 'none';
+        });
+    });
+
+    // 2. Export CSV Logic
+    document.getElementById('btnExportCSV').addEventListener('click', function() {
+        let csv = [];
+        const rows = document.querySelectorAll("#logTable tr");
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            
+            for (let j = 0; j < cols.length; j++) {
+                // Clean data for CSV
+                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s+)/gm, ' ');
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
+        }
+
+        const csvString = csv.join("\n");
+        const a = document.createElement("a");
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+        a.target = '_blank';
+        a.download = 'housing_loan_prediction_logs.csv';
+        document.body.appendChild(a);
+        a.click();
+    });
+});
+</script>
+{% endblock %}
+

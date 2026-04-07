@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Model Evaluation{% endblock %}
+{% block page_title %}Predictive Model Performance Analysis{% endblock %}
+
+{% block content %}
+{% if metrics %}
+<div class="row g-4 mb-5">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-lg p-5 bg-navy text-white text-center" style="background: linear-gradient(135deg, #0a192f 0%, #112240 100%)">
+            <p class="text-uppercase tracking-widest small opacity-50 mb-2">Active Model: {{ metrics.model_name }}</p>
+            <h1 class="display-3 fw-bolder mb-3">Model Accuracy: <span class="text-emerald-green">{{ metrics.accuracy }}%</span></h1>
+            <p class="mb-0 opacity-75">Evaluation performed on {{ metrics.sample_size }} records last updated on Today</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 text-center">
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.f1 }}</h2>
+            <p class="text-muted small fw-bold text-uppercase mb-0">F1 Score</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 text-center">
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.precision }}</h2>
+            <p class="text-muted small fw-bold text-uppercase mb-0">Precision</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 text-center">
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.recall }}</h2>
+            <p class="text-muted small fw-bold text-uppercase mb-0">Recall</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-4 text-center">
+            <h2 class="fw-800 text-navy mb-1">{{ metrics.roc_auc }}</h2>
+            <p class="text-muted small fw-bold text-uppercase mb-0">AUC-ROC</p>
+        </div>
+    </div>
+</div>
+
+<!-- Advanced Model Insights (Visuals) -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 p-4">
+                <h5 class="card-title mb-0"><i class="bi bi-eye-fill me-2 text-primary"></i> Advanced Model Insights</h5>
+            </div>
+            <div class="card-body p-4 pt-0">
+                <div class="row g-4">
+                    <!-- DSR vs NDI Plot (Full Width) -->
+                    <div class="col-12">
+                        <div class="p-4 bg-light rounded-3 h-100 shadow-sm border">
+                            <h6 class="fw-bold mb-3 text-navy"><i class="bi bi-geo-alt me-2"></i> Decision Boundary: DSR vs NDI</h6>
+                            <img src="{{ url_for('static', filename='plots/dsr_ndi_distribution.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3" alt="DSR vs NDI Decision Boundary">
+                            <p class="small text-muted mt-3 mb-0">Visualizes how the key banking metrics influence the model's approval status against the critical thresholds (75% DSR and RM1500 NDI).</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced 1x3 Model Dashboard (Full Width) -->
+                    <div class="col-12 mt-4">
+                        <div class="p-4 bg-light rounded-3 shadow-sm border">
+                            <h6 class="fw-bold mb-3 text-navy"><i class="bi bi-graph-up me-2"></i> {{ metrics.model_name }} Diagnostic Dashboard</h6>
+                            <img src="{{ url_for('static', filename='plots/model_dashboard.png') }}?v={{ range(1, 100000) | random }}" class="img-fluid rounded-3" alt="Model Dashboard">
+                            <p class="small text-muted mt-3 mb-0"><strong>Left:</strong> Feature importance ranks the highest contributors to loan approval decisions. <strong>Center:</strong> Confusion matrix evaluates real vs predicted accuracy. <strong>Right:</strong> ROC Curve measures the model's absolute classification ability.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Model Comparison Table (Colab Style) -->
+<div class="row g-4 mt-2 mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm border-start border-4 border-emerald-green">
+            <div class="card-header bg-white border-0 p-4">
+                <h5 class="card-title mb-0"><i class="bi bi-bar-chart-fill me-2 text-emerald-green"></i> Comparative Algorithm Performance</h5>
+                <p class="small text-muted mb-0">Cross-algorithm validation results on current dataset split (80/20 Test Set).</p>
+            </div>
+            <div class="px-4 pb-4">
+                <!-- Swipe Hint for Mobile -->
+                <div class="d-md-none mb-2 text-end text-muted x-small animate-pulse">
+                    <i class="bi bi-arrow-left-right me-1"></i> Swipe to see all metrics
+                </div>
+                <div class="table-responsive rounded-3 overflow-hidden">
+                    <table class="table table-hover align-middle border mb-0">
+                        <thead class="bg-navy text-white">
+                            <tr>
+                                <th class="py-3 ps-3">Algorithm</th>
+                                <th class="py-3 text-center">Accuracy</th>
+                                <th class="py-3 text-center d-none d-md-table-cell">F1 Score</th>
+                                <th class="py-3 text-center d-none d-md-table-cell">Precision</th>
+                                <th class="py-3 text-center d-none d-md-table-cell">Recall</th>
+                                <th class="py-3 text-center text-emerald-green">AUC-ROC</th>
+                                <th class="py-3 text-center d-none d-md-table-cell">Last Train</th>
+                                <th class="py-3 pe-3 text-end">Strength</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in metrics.comparison %}
+                            <tr class="{{ 'bg-emerald-light bg-opacity-10' if res.is_active else '' }}">
+                                <td class="ps-3 fw-bold text-navy">
+                                    {{ res.name }}
+                                    {% if res.is_active %}<span class="badge bg-emerald-green ms-2 x-small">Active</span>{% endif %}
+                                </td>
+                                <td class="text-center fw-bold">{{ (res.accuracy * 100) | round(1) }}%</td>
+                                <td class="text-center d-none d-md-table-cell">{{ res.f1 }}</td>
+                                <td class="text-center d-none d-md-table-cell">{{ res.precision }}</td>
+                                <td class="text-center d-none d-md-table-cell">{{ res.recall }}</td>
+                                <td class="text-center text-emerald-green fw-bold">{{ res.auc_roc }}</td>
+                                <td class="text-center small text-muted d-none d-md-table-cell">{{ res.trained_at }}</td>
+                                <td class="pe-3 text-end">
+                                    {% if res.accuracy >= 0.8 %}
+                                    <span class="badge bg-success-light text-success border border-success px-2 py-1 small">High Acc</span>
+                                    {% elif res.auc_roc >= 0.8 %}
+                                    <span class="badge bg-info-light text-info border border-info px-2 py-1 small">High AUC</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-muted border px-2 py-1 small">Baseline</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-5 text-center">
+            <div class="p-5">
+                <i class="bi bi-cpu text-muted display-1 opacity-25"></i>
+                <h4 class="mt-4">No Model Data Found</h4>
+                <p class="text-muted">Please go to <a href="{{ url_for('main.dataset_management') }}">Dataset Management</a> and train a model first to see detailed evaluation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

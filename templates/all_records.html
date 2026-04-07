@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}All Application Records{% endblock %}
+{% block page_title %}All Loan Application Records{% endblock %}
+
+{% block content %}
+
+<!-- Toolbar -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body py-3 px-4">
+        <form method="GET" action="{{ url_for('main.all_records') }}">
+            <div class="row g-2 align-items-end">
+                <!-- Search -->
+                <div class="col-12 col-md-5">
+                    <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search</label>
+                    <div class="input-group" style="height:38px;">
+                        <span class="input-group-text bg-white border-end-0 px-3">
+                            <i class="bi bi-search text-muted" style="font-size:0.85rem;"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control border-start-0"
+                               style="height:38px; font-size:0.875rem;"
+                               placeholder="Client name, Ref ID, Analyst..." value="{{ q }}">
+                    </div>
+                </div>
+                <!-- Status -->
+                <div class="col-6 col-md-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase mb-1">Status</label>
+                    <select name="status" class="form-select" style="height:38px; font-size:0.875rem;">
+                        <option value="" {% if not status %}selected{% endif %}>All</option>
+                        <option value="Approved" {% if status == 'Approved' %}selected{% endif %}>Approved</option>
+                        <option value="Rejected" {% if status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+                <!-- Buttons — invisible label keeps baseline aligned with inputs above -->
+                <div class="col-6 col-md-4 d-flex gap-2">
+                    <label class="form-label mb-1 d-none d-md-block" style="visibility:hidden;">_</label>
+                    <div class="d-flex gap-2 w-100 align-items-center" style="height:38px;">
+                        <button type="submit" class="btn btn-navy rounded-pill fw-bold flex-grow-1 h-100 d-flex align-items-center justify-content-center"
+                                style="font-size:0.875rem;">
+                            <i class="bi bi-funnel-fill"></i>
+                            <span class="d-none d-md-inline ms-1">Filter</span>
+                        </button>
+                        <a href="{{ url_for('main.all_records') }}"
+                           class="btn rounded-pill fw-bold flex-shrink-0 h-100 d-flex align-items-center justify-content-center px-3"
+                           style="background:#f1f5f9; color:#64748b; border:1px solid #e2e8f0; font-size:0.875rem; min-width:42px;">
+                            <i class="bi bi-x-lg"></i>
+                            <span class="d-none d-md-inline ms-1">Clear</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Record count -->
+<div class="d-flex justify-content-between align-items-center mb-3 px-1">
+    <p class="text-muted small mb-0">
+        Showing <strong>{{ applications|length }}</strong> of <strong>{{ total }}</strong> records
+        {% if q %} matching "<strong>{{ q }}</strong>"{% endif %}
+        {% if status %} · Status: <strong>{{ status }}</strong>{% endif %}
+    </p>
+    <a href="{{ url_for('main.admin_dashboard') }}" class="small text-muted text-decoration-none">
+        <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+    </a>
+</div>
+
+<!-- Full-width scrollable table -->
+<div class="card border-0 shadow-sm">
+    <!-- Swipe hint for mobile -->
+    <div class="d-md-none px-4 py-2 border-bottom bg-light-subtle d-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left-right text-muted"></i>
+        <span class="x-small text-muted">Swipe left / right to view all columns</span>
+    </div>
+
+    <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table class="table table-hover align-middle mb-0" style="min-width: 1100px;">
+            <thead style="background:#0f172a; color:#fff; position: sticky; top:0; z-index:2;">
+                <tr>
+                    <th class="ps-4 py-3 small text-uppercase fw-700" style="min-width:90px;">Ref ID</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:140px;">Client Name</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:130px;">Analyst</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:110px;">Income (RM)</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:110px;">Loan Amount</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:80px;">DSR (%)</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:110px;">NDI (RM)</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:100px;">Credit</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:80px;">CCRIS</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:100px;">Prediction</th>
+                    <th class="py-3 small text-uppercase fw-700" style="min-width:80px;">Tenure</th>
+                    <th class="pe-4 py-3 small text-uppercase fw-700 text-end" style="min-width:140px;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr class="border-top" style="border-color:#f1f5f9 !important;">
+                    <!-- Ref ID -->
+                    <td class="ps-4">
+                        <a href="{{ url_for('main.result', id=app.id) }}"
+                           class="fw-bold text-navy small text-decoration-none">
+                            #{{ (app.id | string)[-6:] | upper }}
+                        </a>
+                    </td>
+                    <!-- Client -->
+                    <td>
+                        <div class="fw-semibold small">{{ app.full_name or '—' }}</div>
+                        <div class="x-small text-muted">{{ app.nric or '' }}</div>
+                    </td>
+                    <!-- Analyst -->
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="https://ui-avatars.com/api/?name={{ app.user.name | urlencode }}&background=0a192f&color=fff&rounded=true&size=22"
+                                 class="rounded-circle" alt="">
+                            <span class="small text-muted">{{ app.user.name }}</span>
+                        </div>
+                    </td>
+                    <!-- Income -->
+                    <td class="small fw-bold">RM {{ "{:,.0f}".format(app.income or 0) }}</td>
+                    <!-- Loan -->
+                    <td class="small fw-bold">RM {{ "{:,.0f}".format(app.loan_amount or 0) }}</td>
+                    <!-- DSR -->
+                    <td>
+                        <span class="small fw-bold {% if app.dsr and app.dsr > 70 %}text-danger{% else %}text-emerald-green{% endif %}">
+                            {{ "%.1f"|format(app.dsr or 0) }}%
+                        </span>
+                    </td>
+                    <!-- NDI -->
+                    <td>
+                        <span class="small fw-bold {% if app.ndi and app.ndi < 1200 %}text-danger{% else %}text-emerald-green{% endif %}">
+                            RM {{ "{:,.0f}".format(app.ndi or 0) }}
+                        </span>
+                    </td>
+                    <!-- Credit Score -->
+                    <td class="small fw-semibold">{{ app.credit_score | int if app.credit_score else '—' }}</td>
+                    <!-- CCRIS -->
+                    <td>
+                        {% set cs = (app.ccris_status or 'clean').lower() %}
+                        <span class="badge rounded-pill px-2 py-1 x-small
+                            {% if cs == 'clean' %}bg-success bg-opacity-10 text-success
+                            {% elif cs == 'late_payment' %}bg-warning bg-opacity-10 text-warning
+                            {% else %}bg-danger bg-opacity-10 text-danger{% endif %}">
+                            {{ cs.replace('_', ' ').title() }}
+                        </span>
+                    </td>
+                    <!-- Prediction -->
+                    <td>
+                        {% if app.prediction == 'Approved' %}
+                        <span class="badge-approved"><i class="bi bi-check2-circle me-1"></i>Approved</span>
+                        {% elif app.prediction == 'Rejected' %}
+                        <span class="badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                        {% else %}
+                        <span class="text-muted x-small">Pending</span>
+                        {% endif %}
+                    </td>
+                    <!-- Tenure -->
+                    <td class="small text-muted">{{ app.loan_term or '—' }} mo</td>
+                    <!-- Date -->
+                    <td class="pe-4 text-end x-small text-muted">
+                        {{ app.created_at.strftime('%d %b %Y') }}<br>
+                        <span class="fw-bold">{{ app.created_at.strftime('%H:%M') }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="12" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                        No records found{% if q %} for "{{ q }}"{% endif %}.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div class="card-footer bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="x-small text-muted">Page {{ page }} of {{ total_pages }}</span>
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link rounded-pill me-1" href="{{ url_for('main.all_records', page=page-1, q=q, status=status) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page or (p >= page - 2 and p <= page + 2) or p == 1 or p == total_pages %}
+                    <li class="page-item {% if p == page %}active{% endif %}">
+                        <a class="page-link rounded-pill me-1" href="{{ url_for('main.all_records', page=p, q=q, status=status) }}">{{ p }}</a>
+                    </li>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+                    <a class="page-link rounded-pill" href="{{ url_for('main.all_records', page=page+1, q=q, status=status) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,79 +1,342 @@
 {% extends "base.html" %}
+
+{% block title %}Assessment Result{% endblock %}
+{% block page_title %}Financing Decision Analysis{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-7 text-center">
-        <h3 class="mb-4 fw-bold text-dark">AI Prediction Analysis</h3>
-        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-            {% if application.prediction == 'Approved' %}
-            <div class="bg-success text-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-check-circle-fill"></i> System Decision: APPROVED</h5>
-            </div>
-            {% elif application.prediction == 'Rejected' %}
-            <div class="bg-danger text-white py-3">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-x-circle-fill"></i> System Decision: REJECTED</h5>
-            </div>
-            {% else %}
-            <div class="bg-secondary text-white py-3">
-                <h5 class="mb-0 fw-bold">UNKNOWN RESULT</h5>
-            </div>
-            {% endif %}
-
-            <div class="card-body p-5">
-                {% if application.prediction == 'Approved' %}
-                    <div class="mb-4">
-                        <div class="display-4 text-success mb-3"><i class="bi bi-shield-check"></i></div>
-                        <h3 class="text-success fw-bold">Approval Recommended</h3>
-                        <p class="text-muted mt-3 px-md-4">The machine learning model indicates a low risk profile and recommends approval based on the applicant's financial indicators.</p>
+<div class="row g-4 justify-content-center">
+    <div class="col-lg-10">
+        <!-- Main Decision Card -->
+        <div class="card border-0 shadow-lg overflow-hidden mb-5" id="printableCard">
+            <div class="row g-0">
+                <div class="col-md-4 text-white p-4 p-md-5 d-flex flex-column align-items-center justify-content-center text-center"
+                    style="background: {% if application.prediction == 'Approved' %}linear-gradient(135deg, #10b981 0%, #065f46 100%){% else %}linear-gradient(135deg, #ef4444 0%, #991b1b 100%){% endif %}; min-height: 280px;">
+                    <div class="bg-white bg-opacity-20 rounded-circle mb-4 d-flex align-items-center justify-content-center" 
+                         style="width: 120px; height: 120px; margin: 0 auto;">
+                        {% if application.prediction == 'Approved' %}
+                        <i class="bi bi-patch-check-fill text-white" style="font-size: 5rem;"></i>
+                        {% else %}
+                        <i class="bi bi-slash-circle-fill text-white" style="font-size: 5rem;"></i>
+                        {% endif %}
                     </div>
-                {% elif application.prediction == 'Rejected' %}
-                    <div class="mb-4">
-                        <div class="display-4 text-danger mb-3"><i class="bi bi-shield-exclamation"></i></div>
-                        <h3 class="text-danger fw-bold">High Risk Identified</h3>
-                        <p class="text-muted mt-3 px-md-4">The machine learning model identifies high risk factors associated with this application. Further manual review or rejection is advised.</p>
-                    </div>
-                {% else %}
-                    <div class="mb-4">
-                        <h3 class="text-warning fw-bold">Processing</h3>
-                        <p class="mt-3 text-muted">{{ application.prediction }}</p>
-                    </div>
-                {% endif %}
-                
-                <hr class="my-5 border-light opacity-100">
-                
-                <div class="bg-light rounded-3 p-4 text-start shadow-sm">
-                    <h5 class="fw-bold mb-4 text-dark border-bottom pb-2">Application Snapshot</h5>
-                    <div class="row gy-3">
-                        <div class="col-sm-5 text-muted fw-semibold">Application Reference</div>
-                        <div class="col-sm-7 fw-bold text-dark">#{{ application.id }}</div>
-                        
-                        <div class="col-sm-5 text-muted fw-semibold">Processed By</div>
-                        <div class="col-sm-7 fw-bold text-dark">{{ application.user.name }}</div>
+                    <h1 class="display-6 fw-800 mb-2">{{ application.prediction | upper }}</h1>
+                    <p class="mb-4 opacity-75 fw-bold">System Generated Prediction</p>
 
-                        <div class="col-sm-5 text-muted fw-semibold">Total Loan Amount</div>
-                        <div class="col-sm-7 fw-bold text-dark fs-5">${{ application.loan_amount }}</div>
-                        
-                        <div class="col-sm-5 text-muted fw-semibold">Loan Term</div>
-                        <div class="col-sm-7 fw-bold text-dark">{{ application.loan_term }} Months</div>
-
-                        <div class="col-sm-5 text-muted fw-semibold">Monthly Income</div>
-                        <div class="col-sm-7 fw-bold text-dark">${{ application.income }}</div>
-
-                        <div class="col-sm-5 text-muted fw-semibold">Coapplicant Income</div>
-                        <div class="col-sm-7 fw-bold text-dark">${{ application.coapplicant_income }}</div>
-                        
-                        <div class="col-sm-5 text-muted fw-semibold">Credit History Score</div>
-                        <div class="col-sm-7 fw-bold text-dark">{{ application.credit_score }}</div>
-                        
-                        <div class="col-sm-5 text-muted fw-semibold">Application Date</div>
-                        <div class="col-sm-7 fw-bold text-dark">{{ application.created_at.strftime('%B %d, %Y') }}</div>
+                    <div class="w-100 px-4">
+                        <div class="d-flex justify-content-between mb-2 small fw-bold">
+                            <span>Confidence Score</span>
+                            <span>{{ "%.0f"|format(application.confidence_score or 85) }}%</span>
+                        </div>
+                        <div class="progress bg-white bg-opacity-20" style="height: 8px;">
+                            <div class="progress-bar bg-white" role="progressbar" style="width: {{ application.confidence_score or 85 }}%;"></div>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="mt-5">
-                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary btn-lg fw-bold px-5 rounded-pill">Return to Dashboard</a>
+
+                <div class="col-md-8 p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h4 class="text-navy fw-800 mb-1">Assessment Summary</h4>
+                            <p class="text-muted small">Reference: #{{ (application.id | string)[-6:] | upper }} •
+                                Processed on {{ application.created_at.strftime('%d %b %Y') }}</p>
+                        </div>
+                        <span
+                            class="badge {% if application.prediction == 'Approved' %}badge-approved{% else %}badge-rejected{% endif %} fs-6">
+                            {% if application.prediction == 'Approved' %}Low Risk{% else %}High Risk{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="row g-4 mb-5">
+                        <div class="col-sm-6">
+                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Applicant Profile
+                            </h6>
+                            <div class="vstack gap-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Income:</span>
+                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.income) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Credit Health:</span>
+                                    <span class="small fw-bold">{% if application.credit_score >= 700 %}Excellent{% elif application.credit_score >= 600 %}Satisfactory{% else
+                                        %}Requires Attention{% endif %}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">DSR:</span>
+                                    <span
+                                        class="small fw-bold {% if application.dsr and application.dsr > 70 %}text-danger{% else %}text-emerald-green{% endif %}">{{
+                                        "%.1f"|format(application.dsr or 0) }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">NDI:</span>
+                                    <span
+                                        class="small fw-bold {% if application.ndi and application.ndi < 1200 %}text-danger{% else %}text-emerald-green{% endif %}">RM
+                                        {{ "{:,.2f}".format(application.ndi or 0) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 border-start ps-md-4">
+                            <h6 class="text-uppercase x-small fw-800 text-muted tracking-wider mb-3">Financing Details
+                            </h6>
+                            <div class="vstack gap-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Property Value:</span>
+                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.property_value or 0) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Loan Amount:</span>
+                                    <span class="small fw-bold">RM {{ "{:,.2f}".format(application.loan_amount)
+                                        }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Margin:</span>
+                                    <span class="small fw-bold">{{ "%.1f"|format(application.margin) }}%</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="small text-muted">Tenure:</span>
+                                    <span class="small fw-bold">{{ application.loan_term }} Months</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="p-4 rounded-4 bg-light">
+                        <h6 class="fw-bold text-navy mb-3"><i class="bi bi-robot me-2"></i> Model Explanation (AI Insights)</h6>
+                        <ul class="list-unstyled mb-0 small vstack gap-2">
+                            {% for insight in ai_insights %}
+                            <li class="d-flex align-items-center gap-2">
+                                <i class="bi {{ 'bi-check-circle-fill text-emerald-green' if insight.type == 'success' else 'bi-exclamation-triangle-fill text-danger' if insight.type == 'danger' else 'bi-info-circle-fill text-navy' }}"></i>
+                                {{ insight.text }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Agent Advisory: Delta Comparison -->
+                    {% if delta_insights %}
+                    <div class="mt-4 p-4 rounded-4" style="border: 1px solid #fde68a; background: #fffbeb;">
+                        <h6 class="fw-bold mb-3" style="color:#92400e;">
+                            <i class="bi bi-arrow-left-right me-2"></i>
+                            Agent Advisory — Eligibility Change Detection
+                        </h6>
+                        <ul class="list-unstyled mb-0 vstack gap-3">
+                            {% for d in delta_insights %}
+                            <li class="d-flex align-items-start gap-3">
+                                <div class="flex-shrink-0 mt-1">
+                                    {% if d.type == 'danger' %}
+                                    <span class="badge rounded-circle p-2" style="background:#fee2e2;">
+                                        <i class="bi {{ d.icon }} text-danger"></i>
+                                    </span>
+                                    {% elif d.type == 'success' %}
+                                    <span class="badge rounded-circle p-2" style="background:#d1fae5;">
+                                        <i class="bi {{ d.icon }} text-success"></i>
+                                    </span>
+                                    {% else %}
+                                    <span class="badge rounded-circle p-2" style="background:#fef3c7;">
+                                        <i class="bi {{ d.icon }}" style="color:#92400e;"></i>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-0 small" style="line-height:1.6;">{{ d.text }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <p class="x-small text-muted mt-3 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Comparison is made against the most recent previous submission by this applicant.
+                            Thresholds: DSR ±5%, NDI ±RM200, Credit Score ±30 pts.
+                        </p>
+                    </div>
+                    {% endif %}
+
+
+
+                    <!-- Post-Submission Eligibility Re-Assessment -->
+                    {% if eligibility_checks %}
+                    <div class="mt-4 p-4 rounded-4" style="border: 1px solid #e2e8f0; background:#fafafa;">
+                        <h6 class="fw-bold text-navy mb-3">
+                            <i class="bi bi-clipboard2-pulse me-2 text-emerald-green"></i>
+                            Eligibility Re-Assessment — DSR / NDI Comparison
+                        </h6>
+                        <!-- Desktop Table View -->
+                        <div class="table-responsive rounded-3 overflow-hidden d-none d-md-block">
+                            <table class="table table-sm mb-0 align-middle" style="border:1px solid #e2e8f0;">
+                                <thead style="background:#0f172a; color:#fff;">
+                                    <tr>
+                                        <th class="py-2 ps-3 small text-uppercase">Metric</th>
+                                        <th class="py-2 text-center small text-uppercase">Your Value</th>
+                                        <th class="py-2 text-center small text-uppercase">Bank Benchmark</th>
+                                        <th class="py-2 text-center small text-uppercase">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for chk in eligibility_checks %}
+                                    <tr style="border-top:1px solid #f1f5f9;">
+                                        <td class="ps-3 py-2">
+                                            <div class="fw-semibold small text-navy">{{ chk.metric }}</div>
+                                            <div class="x-small text-muted">{{ chk.note }}</div>
+                                        </td>
+                                        <td class="text-center fw-bold small {% if chk.pass %}text-emerald-green{% else %}text-danger{% endif %}">
+                                            {{ chk.your_value }}
+                                        </td>
+                                        <td class="text-center small text-muted fw-semibold">{{ chk.benchmark }}</td>
+                                        <td class="text-center">
+                                            {% if chk.pass %}
+                                            <span class="badge rounded-pill px-3 py-2" style="background:#d1fae5; color:#065f46; font-size:0.7rem;">
+                                                <i class="bi bi-check-circle-fill me-1"></i> Pass
+                                            </span>
+                                            {% else %}
+                                            <span class="badge rounded-pill px-3 py-2" style="background:#fee2e2; color:#991b1b; font-size:0.7rem;">
+                                                <i class="bi bi-x-circle-fill me-1"></i> Fail
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile List View -->
+                        <div class="d-md-none">
+                            <div class="vstack gap-3">
+                                {% for chk in eligibility_checks %}
+                                <div class="p-3 rounded-4 border bg-white shadow-sm">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <div class="fw-bold text-navy mb-0 small">{{ chk.metric }}</div>
+                                            <div class="x-small text-muted" style="line-height:1.2;">{{ chk.note }}</div>
+                                        </div>
+                                        {% if chk.pass %}
+                                        <span class="badge rounded-pill px-2 py-1" style="background:#d1fae5; color:#065f46; font-size:0.6rem;">
+                                            <i class="bi bi-check-circle-fill"></i> PASS
+                                        </span>
+                                        {% else %}
+                                        <span class="badge rounded-pill px-2 py-1" style="background:#fee2e2; color:#991b1b; font-size:0.6rem;">
+                                            <i class="bi bi-x-circle-fill"></i> FAIL
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row g-2 pt-2 border-top">
+                                        <div class="col-6">
+                                            <div class="x-small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem;">Your Value</div>
+                                            <div class="small fw-bold {% if chk.pass %}text-emerald-green{% else %}text-danger{% endif %}">{{ chk.your_value }}</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <div class="x-small text-muted text-uppercase fw-bold mb-1" style="font-size: 0.6rem;">Benchmark</div>
+                                            <div class="small fw-bold text-navy">{{ chk.benchmark }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <p class="x-small text-muted mt-2 mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Benchmarks based on BNM-aligned Malaysian residential financing guidelines. Thresholds adjust by income bracket.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if recommended_price > 0 %}
+
+                    <div class="mt-4 p-4 rounded-4 bg-navy text-white shadow-lg">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="fw-bold mb-0">Affordability Insight</h6>
+                            <span class="x-small opacity-75 fw-bold text-uppercase">Best Value Match</span>
+                        </div>
+                        <p class="x-small opacity-75 mb-3">Based on your financial profile, we recommend a purchase price up to:</p>
+                        <h4 class="fw-800 mb-0">RM {{ "{:,.0f}".format(recommended_price) }}</h4>
+                    </div>
+                    {% endif %}
+
+                    {% if suggested_banks %}
+                    <div class="mt-4 p-4 rounded-4" style="background-color: #f0fdf4; border: 1px solid #dcfce7;">
+                        <h6 class="fw-bold text-emerald-green mb-3"><i class="bi bi-bank me-2"></i> Recommended
+                            Financial Institutions (FI)</h6>
+                        <div class="vstack gap-3">
+                            {% for bank in suggested_banks %}
+                            <div
+                                class="d-flex align-items-center gap-4 p-3 rounded-4 hover-bg-light transition-all bg-white border border-success border-opacity-10 shadow-sm mb-2">
+                                <div class="bg-light p-3 rounded-circle shadow-sm"
+                                    style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-bank2 text-navy fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <h6 class="mb-0 fw-800 text-navy">{{ bank.name }}</h6>
+                                        <div class="text-end">
+                                            <span class="badge rounded-pill px-3 py-2" 
+                                                  style="background: #d1fae5; color: #065f46; border: 1px solid #10b981; font-weight: 800;">
+                                                {{ bank.score or 95 }}% Match
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2 x-small text-muted" style="line-height: 1.4;"><i
+                                            class="bi bi-info-circle me-1"></i> {{ bank.reason }}</p>
+
+                                    <div class="d-flex gap-4">
+                                        <div>
+                                            <span class="text-muted x-small d-block fw-bold text-uppercase">Monthly
+                                                Pay</span>
+                                            <span class="text-emerald-green fw-800 small">RM {{
+                                                "{:,.2f}".format(bank.installment) }}</span>
+                                        </div>
+                                        <div class="border-start ps-4">
+                                            <span class="text-muted x-small d-block fw-bold text-uppercase">Est.
+                                                Rate</span>
+                                            <span class="text-navy fw-800 small">{{ bank.rate }}% p.a.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <div class="card-footer bg-white border-top-0 p-4 border-top">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border flex-grow-1" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i> Print
+                        </button>
+                        <button class="btn btn-light px-4 fw-bold rounded-pill border flex-grow-1" id="btnDownloadPDF">
+                            <i class="bi bi-download me-2"></i> PDF
+                        </button>
+                    </div>
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <a href="{{ url_for('main.loan_form', id=application.id) }}"
+                            class="btn btn-outline-navy px-4 fw-bold rounded-pill">Edit analysis</a>
+                        <a href="{{ url_for('main.loan_form') }}"
+                            class="btn btn-navy px-4 fw-bold rounded-pill">New Assessment</a>
+                        <a href="{{ url_for('main.dashboard') }}"
+                            class="btn btn-emerald-green text-white px-5 fw-bold rounded-pill shadow">Save Record</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    document.getElementById('btnDownloadPDF').addEventListener('click', function() {
+        const element = document.getElementById('printableCard');
+        const opt = {
+            margin:       0.5,
+            filename:     'Financing_Assessment_{{ (application.id | string)[-6:] | upper }}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        // New Promise-based usage:
+        html2pdf().set(opt).from(element).save();
+    });
+</script>
+{% endblock %}
 {% endblock %}

@@ -1,0 +1,40 @@
+{
+    "success": true,
+    "model_name": "Random Forest Classifier",
+    "type": "random_forest",
+    "trained_at": "2026-04-02 07:51:11",
+    "accuracy": 80.7,
+    "precision": 0.7506,
+    "recall": 0.7487,
+    "f1": 0.7497,
+    "roc_auc": 0.867,
+    "confusion_matrix": {
+        "tn": 518,
+        "fp": 96,
+        "fn": 97,
+        "tp": 289
+    },
+    "feature_importance": [
+        {
+            "name": "Credit Score",
+            "value": 0.3738
+        },
+        {
+            "name": "Dsr",
+            "value": 0.1717
+        },
+        {
+            "name": "Ndi",
+            "value": 0.1374
+        },
+        {
+            "name": "Applicantincome",
+            "value": 0.1172
+        },
+        {
+            "name": "Monthly Installment",
+            "value": 0.1046
+        }
+    ],
+    "sample_size": 1000
+}
